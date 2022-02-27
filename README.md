@@ -1,6 +1,6 @@
 # Additive Manufacturing Benchmark 2022 Code Repository
 
-This repository is setup for code sharing for the (NIST AMBench 2022 project)[https://www.nist.gov/ambench]
+This repository is setup for code sharing for the [NIST AMBench 2022 project](https://www.nist.gov/ambench)
 
 ## How to Use this Repository
 
