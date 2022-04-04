@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+
+  <xs:include schemaLocation="AMReference.xsd" />
+  <!-- <xs:include schemaLocation="AMBuild.xsd" /> -->
+
+  <!-- ================================= -->
+  <!-- Measurement prototyping -->
+  <!-- ================================= -->
+
+  <xs:complexType name="Measurement">
+    <xs:complexContent>
+      <xs:extension base="AMActivity">
+        <xs:sequence>
+          <xs:element name="benchmarkId" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="challengeId" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="facility" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="relatedMeasurement" type="RelatedMeasurement" minOccurs="0" maxOccurs="unbounded" />
+          <xs:element name="isCalibrationMeasurement" type="xs:string" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="RelatedMeasurement">
+    <xs:sequence>
+      <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="measurementIdentifier" type="identifier" minOccurs="0" maxOccurs="1" />
+      <xs:element name="data" type="DigitalArtifact" minOccurs="0" maxOccurs="1" />
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="MeasurementInput">
+    <xs:sequence>
+      <xs:element name="specimenID" type="xs:string" minOccurs="0" maxOccurs="1" />
+      <!-- Powder doesn't have PID -->
+      <xs:element name="specimenPID" type="xs:anyURI" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>
+            PID identifying a PhysicalArtefact, i.e. more generic than a Specimen.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="specimenType" type="ArtifactType" minOccurs="0" maxOccurs="1" />
+      <xs:element name="specimenMeasurementGeometry" type="SpecimenMeasurementGeometry" minOccurs="0"
+        maxOccurs="1" />
+      <xs:element name="specimenMetadata" type="ObjectType" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SpecimenMeasurementGeometry">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element name="document" type="DigitalArtifact" maxOccurs="1" />
+      <xs:element name="imageRef" type="AMBlobReference" maxOccurs="unbounded" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="MeasurementMethod">
+    <xs:sequence>
+      <xs:element name="instrumentConfiguration" type="InstrumentConfiguration" minOccurs="1" maxOccurs="1" />
+      <xs:element name="experimentConfiguration" type="ExperimentConfiguration" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InstrumentConfiguration">
+    <xs:sequence>
+      <xs:element name="mainInstrument" type="Instrument" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="ancillaryInstrument" type="Instrument" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ExperimentConfiguration">
+    <xs:sequence>
+      <xs:element name="component" type="ConfigurationObject" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ConfigurationObject">
+    <xs:complexContent>
+      <xs:extension base="ObjectType">
+        <xs:sequence>
+          <xs:element name="associatedInstrument" type="InstrumentRef" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+    <xs:complexType name="MeasurementOutput">
+    <xs:sequence>
+      <xs:element name="dataSet" type="DataSet" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DataSet">
+    <xs:sequence>
+      <!-- content value can be raw data, calibration data, process data, test lab result -->
+      <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="dataObject" type="DataObject" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="DataObject">
+    <xs:complexContent>
+      <xs:extension base="ObjectType">
+        <xs:sequence>
+          <xs:element name="measuredBy" type="InstrumentRef" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="InstrumentRef">
+    <xs:sequence>
+      <xs:element name="instrumentName" type="xs:string" minOccurs="0" maxOccurs="1" />
+      <xs:choice minOccurs="0" maxOccurs="1">
+        <xs:element name="detector" type="xs:string" />
+        <xs:element name="sensor" type="xs:string" />
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- =============== Digital Image Correlation =============== -->
+  <xs:complexType name="DigitalImageCorrelationMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Optical method for characterizing sample geometry during mechanical deformation</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- =============== Laser Absorptivity =============== -->
+  <xs:complexType name="LaserAbsorptivityMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>In situ Measurement of the laser absorptivity</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- =============== Mechanical Testing =============== -->
+  <xs:complexType name="MechanicalTestingMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Mechanical testing of material behavior</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- =============== Radiography =============== -->
+  <xs:complexType name="RadiographyMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>X-ray imaging, typically high speed at a synchrotron</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- =============== RS synchrotron ED =============== -->
+  <xs:complexType name="RSSynchrotronEDMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Residual strain and stress measurement using energy dispersive synchrotron X-ray diffraction</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- =============== Thermography =============== -->
+  <xs:complexType name="ThermographyMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>In situ build characterization using short-wave infrared imaging</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- =============== Composition =============== -->
+  <xs:complexType name="CompositionMeasurement">
+    <xs:complexContent>
+      <xs:extension base="AMActivity">
+        <xs:sequence>
+          <xs:element name="materialDesignation" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="testingLab" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="CompositionResult" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="CompositionResult">
+    <xs:sequence>
+      <xs:element name="testReport" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="composition" type="Composition" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="PowderSizeMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Methods for characterizing the size distribution of a powder</label>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMActivity">
+        <xs:sequence>
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1" />
+          <xs:element name="results" type="PowderSizeDistributionResult" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="PowderSizeDistributionResult">
+    <xs:sequence>
+      <xs:element name="testReport" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="powderSizeDistribution" type="PowderSizeDistribution" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

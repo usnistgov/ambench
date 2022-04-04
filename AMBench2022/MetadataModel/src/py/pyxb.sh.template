@@ -1,0 +1,5 @@
+# needs: pip install pyxb
+# substitute location of XSD and target folder, e.g. where git repo has been cloned
+~/miniconda3/envs/py38/bin/pyxbgen\
+        -m amdoc -u /home/idies/workspace/Storage/[USERNAME]/persistent/GIT/informatics/XML/XSD/AMBench2022/AMDocs.xsd\
+        --binding-root /home/idies/workspace/Storage/[USERNAME]/persistent/GIT/informatics/src/py/ambench
