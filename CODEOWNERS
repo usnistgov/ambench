@@ -7,9 +7,10 @@
 
 # REPOSITORY OWNERS
 
-* Chandler Becker (NIST/AMBench project)
-* Gretchen Greene (NIST/AMBench project)
-* Gerard Lemson (JHU/AMBench project)
+### NIST AMBench project
+* @usnistgov/cb1610
+* @usnistgov/grg2
+* @glemson
 
 # CODE CONTRIBUTORS
    
