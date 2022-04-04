@@ -6,7 +6,7 @@
 # The sequence matters: later patterns take precedence.
 
 # FILES  OWNERS
-*       AM Bench code repository managers
-*       Chandler Becker
-*       Gretchen Greene
-*       
+   * AM Bench code repository managers
+   * Chandler Becker
+   * Gretchen Greene
+   
