@@ -5,8 +5,11 @@
 # Each line is a file pattern followed by one or more owners.
 # The sequence matters: later patterns take precedence.
 
-# FILES  OWNERS
-   * AM Bench code repository managers
-   * Chandler Becker
-   * Gretchen Greene
+# REPOSITORY OWNERS
+
+* Chandler Becker (NIST/AMBench project)
+* Gretchen Greene (NIST/AMBench project)
+* Gerard Lemson (JHU/AMBench project)
+
+# CODE CONTRIBUTORS
    
