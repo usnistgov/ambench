@@ -1,13 +1,30 @@
 # Additive Manufacturing Benchmark Code Repository
 
-This repository is setup for code sharing in support of the [NIST AMBench 2022 project](https://www.nist.gov/ambench)
+This repository is setup for code sharing in support of the [NIST AMBench 2022 project](https://www.nist.gov/ambench).
 
 ## How to Use this Repository
+### Software description
+Codes and scripts in this repository are categorized into three groups, each of which is shared in its own folder as described below. 
+* ContributedCodeANDScripts 
 
+   Analysis codes and scripts which make use of the AM Bench 2022 data but are not developed as part of the project 
+* MetadataModel 
 
-### Software or Data description
+   The [XML Schema](https://www.w3.org/XML/Schema) of a data model that describes the AM Bench 2022 data and the python scripts translating AM Bench metadata to XML documents conforming to this XML schema.
+
+   The data model is an abstraction of the metadata which describe the build processes and their resulting specimens and the measurements made on these in the context of the AM Bench 2022 project.  The schema was designed to support typical science questions which users of a database with metadata about the AM Bench results might wish to pose. The metadata include identifiers assigned to build products, derived specimens, and measurements; links to relevant journal publications, documents, and illustrations; provenance of specimens such as source materials and details of the build process; measurement geometry, instruments and other configurations used in measurements; and access information to raw and processed data as well as analysis descriptions of these datasets. The metadata are provided by the contributors to the AM Bench project. They entered values for the metadata fields for an AM Bench measurement, specimen or build process in tabular spreadsheets.
+
+   The python scripts published in this folder translate these metadata entries to XML documents compliant with the schema. The generated XML documents are loaded into a [CDCS](https://www.nist.gov/itl/ssd/information-systems-group/configurable-data-curation-system-cdcs/about-cdcs) database with a persistent identifier (PID) assigned by the database. 
+
+* ReferenceCodeANDScripts
+
+   Analysis codes and scripts developed as part of the AM Bench 2022 project   
+   
+   
+<!--   
    - Statements of purpose and maturity
    - Technical installation instructions
+-->   
 ### Contact information
    - PI name, NIST OU, Division, and Group names
    - Contact email address at NIST
