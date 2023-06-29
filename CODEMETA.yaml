@@ -175,8 +175,8 @@ themes:
   #
   # - Infrastructure
   #
-  # - Manufacturing
-  #     - Additive manufacturing
+  - Manufacturing
+      - Additive manufacturing
   #     - Biomanufacturing
   #     - Factory communications
   #     - Factory operations planning and control
@@ -197,7 +197,7 @@ themes:
   #         - Navigation, actuation and control
   #         - Sensing and perception
   #     - Supply chain
-  #     - Sustainable manufacturing
+      - Sustainable manufacturing
   #     - Systems engineering
   #     - Systems integration
   #     - Technology commercialization
@@ -206,14 +206,14 @@ themes:
   #     - Ceramics
   #     - Composites
   #     - Concrete and cement
-  #     - Materials characterization
+      - Materials characterization
   #         - Composition and structure
   #         - Magnetic properties
   #         - Mechanical properties
   #         - Thermal properties
-  #     - Metals
-  #     - Modeling and computational material science
-  #     - Polymers
+      - Metals
+      - Modeling and computational material science
+      - Polymers
   #     - Superconductors
   #
   # - Mathematics and Statistics
