@@ -1,0 +1,151 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:include schemaLocation="AMReference.xsd" />
+  <xs:include schemaLocation="AMBuild.xsd" />
+  <xs:include schemaLocation="AMMeasurement.xsd" />
+  <xs:complexType name="AMDocRoot">
+    <xs:annotation>
+      <xs:documentation>AN XML schema type which represents a root element
+        for an AM Bench XML document. This type wraps the more specific
+        AM Bench resource documents including specimens and measurements.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="pid" type="xs:anyURI" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>PID</label>
+          </xs:appinfo>
+          <xs:documentation>The persistent identifier (PID) assigned to an XML document
+            uploaded in NIST's CDCS database system.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element name="AMBuildPlate" type="AMBuildPlate">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMBuildPlate</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about build plates created in AM Bench project.
+              The metadata structure of a build plate is defined in AMBuild.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMBuildPart" type="BuildPart">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMBuildPart</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about build parts created in AM Bench project.
+              The metadata structure of a build part is defined in AMBuild.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMBSpecimen" type="Specimen">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>ABMSpecimen</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about specimens created in AM Bench project.
+              The metadata structure of a specimen is defined in AMBuild.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMPowder" type="Powder">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMPowder</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about powder used in AM Bench project.
+              The metadata structure of powder is defined in AMBuild.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Material" type="Material">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Material</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about a material used in AM Bench project.
+              A material is a solid object of well defined shape used to produce AM Bench samples. 
+              Examples include metal sheets and blocks.
+              The metadata structure of a material is defined in AMBuild.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMBuildProcess" type="AMBuildProcess">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMBuildProcess</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about build processes in AM Bench project.
+              The metadata structure of a build process is defined in AMBuild.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMMechanicalTesting" type="MechanicalTestingMeasurement">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMMechanicalTesting</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about mechanical testing measurements conducted in AM Bench project
+              which provide mechanical testing of material behavior.
+              The metadata structure of a mechanical testing measurement is defined in AMMeasurement.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMLaserAbsorptivity" type="LaserAbsorptivityMeasurement">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMLaserAbsorptivity</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about mechanical testing measurements conducted in AM Bench project
+              which provide in situ characterization of the laser absorptivity.
+              The metadata structure of a mechanical testing measurement is defined in AMMeasurement.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMRadiography" type="RadiographyMeasurement">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMRadiography</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about mechanical testing measurements conducted in AM Bench project
+              which measure density variations in samples.
+              The metadata structure of a mechanical testing measurement is defined in AMMeasurement.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AMComposition" type="CompositionMeasurement">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>AMComposition</label>
+            </xs:appinfo>
+            <xs:documentation>The metadata about composition measurements conducted in AM Bench project 
+              which determine what elements are present in the sample and in what quantity.
+              The metadata structure of a mechanical testing measurement is defined in AMMeasurement.xsd.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AMDoc" type="AMDocRoot">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>AMDoc</label>
+      </xs:appinfo>
+      <xs:documentation>A root element for an AM Bench XML document. 
+        It encloses the elements for more specific AM Bench resource 
+        including specimens and measurements.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:element name="AMBlob" type="Blob">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>AMBlob</label>
+      </xs:appinfo>
+      <xs:documentation>An XML document which contains a blob.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+</xs:schema>

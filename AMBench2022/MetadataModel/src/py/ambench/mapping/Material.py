@@ -54,13 +54,15 @@ class Mapper(AMMapper):
         material.description=maybe_string(t.Description)
         material.creationDate = maybe_date(t.Approximate_acquisition_date)
         material.supplier=maybe_string(t.Supplier)
-        material.type=maybe_string(t.Type)
+        materialInfo=amdoc.MaterialInfo()
+        materialInfo.materialClass=maybe_string(t.Type)
+        material.materialInfo=materialInfo
         material.specifications=maybe_string(t.Specifications)
-        material.providedCharacterization = [newDigitalArtifact(url=t.Provided_characterization)]
+        material.providedCharacterization = newDigitalArtifact(url=t.Provided_characterization)
 
         identifier=amdoc.identifier()
         identifier.id=t.MaterialID
-        identifier.type="Internal"
+        identifier.type=AMMapper.DEFAULT_ID_TYPE
         material.identifier=[identifier]
 
 

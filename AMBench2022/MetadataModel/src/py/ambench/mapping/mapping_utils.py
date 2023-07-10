@@ -2,7 +2,9 @@ import pandas
 import pyxb
 import string
 import datetime
-
+import sys
+import traceback
+import re
 from ambench import amdoc
 
 def maybe_string(v, na=None):
@@ -81,7 +83,7 @@ def stringfy(s, na=None):
 
 # u is units, un is uncertainty, and unType is uncertainty type
 def newPhysicalQuantity(v, u=None, un=None, unType="amount", na=None):
-    if v is None or maybe_string(v) == 'NA':
+    if v is None or maybe_string(v) == 'NA' or pandas.isnull(v):
         return None
     
     fv = maybe_floatarray(v)
@@ -90,7 +92,7 @@ def newPhysicalQuantity(v, u=None, un=None, unType="amount", na=None):
         qn.value_ = fv
         unit = maybe_string(u)
         if unit is not None:
-            qn.unit = unit
+            qn.unit = unitSymbol(unit)
 
         unv = maybe_double(un)
         if unv is not None:
@@ -98,11 +100,23 @@ def newPhysicalQuantity(v, u=None, un=None, unType="amount", na=None):
             uncertainty.value_=unv
             uncertainty.type=unType
         return qn
-    else:     
-        print("WARNING: Invalid float array value for physical quantity", v)
-        return None    
+    else:
+        print(f"Error: Invalid value for physical quantity {v}")
+        return None
+
+def unitSymbol(u):
+    if u == 'um':
+        return '\u03BC'+'m'
+    elif u == 'us':
+        return '\u03BC'+'s'
+    elif u == 'deg':
+        return '\u00b0'
+    else:
+        return u
 
 def newRange(v, u=None):
+    if v is None or pandas.isnull(v):
+        return None
     fv = maybe_floatarray(v)
     if fv is not None and len(fv) ==2:
         qn = amdoc.Range()
@@ -115,31 +129,36 @@ def newRange(v, u=None):
 
         unit = maybe_string(u)
         if unit is not None:
-            qn.unit = unit
+            qn.unit = unitSymbol(unit)
         return qn
     else:     
-        print("WARNING: Invalid values for range ", v)
+        print(f"Error: Invalid values for range {v}")
         return None        
 
 def newField( k, v, na=None, desc=None, link=None):
-#     For keyword doesn't allow NA or None
+#     For keyword it's not allowed NA or None
     k = maybe_string(k)
     if k is None:
-        print("WARNING: Cannot create Field since no Field name is given.")
+        print("ERROR: Cannot create Field since no Field name is given.")
         return None
     
     e = amdoc.Field()
     e.name = k.strip()
     if type(v) == amdoc.physical_quantity_type:
         e.quantity = [v]
-    elif type(v) == amdoc.DigitalArtifact:
-        e.digitalArtifact = [v]
+    elif type(v) is list:
+        if len(v) == 1 and type(v[0]) ==amdoc.DigitalArtifact:
+            e.digitalArtifact = v
+        else:
+            print(f"ERROR:Cannot create newField from List of DigitalArtifact {v}")
     elif type(v) == amdoc.ObjectType:
         e.object = [v]
     elif maybe_string(v, na):    
         e.value_=[maybe_string(v, na)]
+    elif pandas.isnull(v):
+        return None
     else:
-        print("WARNING: No value is set for Field ", k)
+        print(f"ERROR:Cannot create new Field with keyword {k} and value {v}")
         return None
     
     desc = maybe_string(desc) 
@@ -160,7 +179,7 @@ def new_note(record,column,columns):
     note=amdoc.Note()
     note.text=c
     note.title=column
-    note.date=pyxb.binding.datatypes.dateTime(datetime.datetime.now())
+    #note.date=pyxb.binding.datatypes.dateTime(datetime.datetime.now())
     
     return note
 
@@ -170,7 +189,7 @@ def readDateTime(s, fm, na=None):
     if s is not None and len(s.strip())>0 and fm is not None and len(fm.strip())>0:
         return datetime.datetime.strptime(s, fm)
     else: 
-        print("WARNING: Incomplete date time string and its format")
+        print(f"Error: Incorrect date time string {s} or format {fm}")
         return None
     
 def createContributors(s):
@@ -190,31 +209,62 @@ def createContributors(s):
     
 #identifier, title, desc, type (file, folder, database), format, comment, urls, na values for urls    
 def newDigitalArtifact(url, urlna=None, iden=None, title=None, desc=None, typ=None, fm=None, comm=None):
-    e = amdoc.DigitalArtifact()
-    
-    url = maybe_string(url, urlna)     
-    if url is not None:
-        e.accessURL = url.split(",")
-    else:
-        return None
-    if iden is not None: 
-        e.identifier = iden
-    if title is not None:
-        e.title = title
-    if desc is not None:
-        e.description = desc
-    if typ is not None:
-        e.type = typ
-    if fm is not None:
-        e.format = fm
-    if comm is not None:
-        e.comment = comm
-    return e
+    try :
+        url = maybe_string(url, urlna) 
+        artifacts = []
+        if url is not None :
+            accessURLs = [x.strip() for x in url.split(",")]
+        
+        if url is not None and len(accessURLs) > 0:
+            regex = re.compile('^http[s]?:\/\/(dx\.)?doi\.org\/')
+            for u in accessURLs:
+                e = amdoc.DigitalArtifact()
+                e.accessURL = [u]
+                if re.match(regex, u):
+                    i = [x.isdigit() for x in u].index(True)
+                    e.DOI = u[i:]
+                if iden is not None: 
+                    e.identifier = maybe_string(iden, urlna)
+                if title is not None:
+                    e.title = maybe_string(title, urlna)
+                if desc is not None:
+                    e.description = maybe_string(desc, urlna)
+                if typ is not None:
+                    e.type = maybe_string(typ, urlna)
+                if fm is not None:
+                    e.format = maybe_string(fm, urlna)
+                if comm is not None:
+                    e.comment = maybe_string(comm, urlna)
+                artifacts.append(e)
+        else:
+            e = amdoc.DigitalArtifact()
+            if iden is not None: 
+                e.identifier = maybe_string(iden, urlna)
+            if title is not None:
+                e.title = maybe_string(title, urlna)
+            if desc is not None:
+                e.description = maybe_string(desc, urlna)
+            if typ is not None:
+                e.type = maybe_string(typ, urlna)
+            if fm is not None:
+                e.format = maybe_string(fm, urlna)
+            if comm is not None:
+                e.comment = maybe_string(comm, urlna)
+            if (iden is None and title is None and desc is None and comm is None):
+                return None
+            else:
+                artifacts.append(e)
+    except:
+        print("ERROR: Cannot create digital artifact object from url ", url)
+        print(traceback.format_exc(), file=sys.stderr, flush=True)      
+        pass
+        
+    return artifacts
 
 def createDADataObject(k, v, na=None, desc=None, by=None, typ="file"):
     k = maybe_string(k)
     if k is None:
-        print("WARNING: Cannot create Data Object of Digital Artifact type since no field name is given.")
+        print("ERROR: Cannot create Data Object of Digital Artifact type since no field name is given.")
         return None
     
     v = maybe_string(v, na)
@@ -234,22 +284,20 @@ def createDADataObject(k, v, na=None, desc=None, by=None, typ="file"):
 def add2ObjectType(objType, k, v, na=None, desc=None, link=None):
     k = maybe_string(k)
     if k is None:
-        print("WARNING: Cannot add to Object Type since no Field name is given.")
+        print("ERROR: Cannot add to Object Type since no Field name is given.")
         return objType
     
     if v is not None:
         f = newField(k, v, na, desc, link)
         if f is not None:
             objType.field.append(f) 
-    else:
-        print("WARNING: No value given for ", k)
     return objType
 
 # Create dataObject and add it to DataSet
 def add2DataSet(ds, k, v, na=None, by=None, desc=None, link=None):
     k = maybe_string(k)
     if k is None:
-        print("WARNING: Cannot add to Data set since no Field name is given.")
+        print("ERROR: Cannot add to Object Type since no Field name is given.")
         return ds
     if v is not None:
         f = newField(k, v, na, desc, link)
@@ -262,8 +310,6 @@ def add2DataSet(ds, k, v, na=None, by=None, desc=None, link=None):
                 ds.dataObject = [o]
             else:
                 ds.dataObject.append(o)
-    else:
-        print("WARNING: No value is set for Field ", k)
     return ds
 
 # Add dataObject to DataSet
@@ -276,7 +322,7 @@ def addDO2DataSet(ds, do, by=None):
         else:
             ds.dataObject.append(do)
     else:
-        print("WARNING: DataObject passed in argument is null.")
+        print("ERROR: DataObject passed in argument is null.")
     return ds
 
 def createId(s, typ, na=None):

@@ -22,6 +22,7 @@ import warnings
 import hashlib
 import openpyxl
 from openpyxl_image_loader import SheetImageLoader
+from io import BytesIO
 
 from ambench import amdoc
 
@@ -173,7 +174,7 @@ class AMBench2022(CDCS):
                 #
                 template_id = rec['id']
                 print('Found template',schema_title,'at id=',template_id)
-                template_upload_url = '/rest/template-version-manager/' + template_id + '/version/'
+                template_upload_url = f'/rest/template-version-manager/{template_id}/version/'
                 needs_patch=True
 
         with open(schema_file, 'r', encoding='utf-8') as template_file:
@@ -328,10 +329,11 @@ class AMBench2022(CDCS):
     #====================================================
     def mongo_query(self,MQ):
         '''
-        execuyte a mongo query vs the current template
+        execute a mongo query vs the current template
+        NB setting param to False
         '''
         self.checkTemplate()
-        return self.query(template=self.template,mongoquery=MQ)
+        return self.query(template=self.template,mongoquery=MQ, parse_dates=False)
 
     def query_template_documents(self):
         '''
@@ -459,6 +461,175 @@ class AMBench2022(CDCS):
         else:    
             return None    
 
+    def unpack_result(self, docs, *elt_names):  
+        '''elt_names: List of xml element names except DEFAULT_COLS to include in the query result.'''
+        row = {'name':[], 'doc_type':[], 'pid':[]}    
+        for t in docs.itertuples():
+            root = ET.fromstring(t.xml_content) 
+            doctype = root[1].tag
+            if doctype is None:
+                print(f"Document Type is not specified")
+                return None
+
+            name=root.findall(f'{doctype}/name')[0].text
+            pids=root.findall('pid')
+            if len(pids) == 1:
+                pid = pids[0].text
+            else:
+                pid = None
+                print(f"PID for {name} not specified")
+            row['name'].append(name)
+            row['doc_type'].append(doctype)
+            row['pid'].append(pid)        
+
+            if len(elt_names) > 0:
+                for i, elt_name in enumerate(elt_names):
+                    elt_val = self.iterate_element_tree(elt_name, root)
+                    if row.get(elt_name) == None:
+                        row[elt_name] = [elt_val]
+                    else:
+                        row[elt_name].append(elt_val)
+        df = pandas.DataFrame(row)
+        df['xml_content']=docs['xml_content']
+        return df      
+
+
+    def iterate_element_tree(self, elt_name, root):
+        elt_val = []
+        for e in root.findall('.//' +elt_name):
+            if e.text:
+                elt_val.append(e.text)
+            else:
+                for c in e.iter(tag=ET.Element):
+                    if c.text:
+                        elt_val.append(c.text)
+        if len(elt_val) == 0:
+            return None
+        else:
+            return elt_val        
+        
+    def build_mongo_query(self, list_join_op, *pars):
+        q = []
+        for par in pars:
+            doctypes= par[0]
+            cls = par[1]
+            op = cls['join_op']
+            if doctypes is None:
+                q = q + self.build_mongo_query_condition(None, op, *cls['conditions'])
+            else:
+                for d in doctypes: #For each doctype
+                    q = q + self.build_mongo_query_condition(d, op, *cls['conditions'])
+        if list_join_op is not None:
+            return {list_join_op:q}
+        else:
+            return q
+
+    def build_mongo_query_condition(self, d, op, *conds):
+        conditions = []
+        for con in conds:
+            path = con['path']
+            if len(path) == 1:
+                if path[0] == 'pid':
+                    p = "AMDoc."+path[0]
+                else:
+                    p = "AMDoc."+d +'.'+ path[0]
+            else:
+                p = "AMDoc."+path[1] +'.'+path[0]
+            value = con['value']
+            for k, v in value.items():
+                if k == '$regex': 
+                    val={k:v,  '$options': 'i'}
+                else:
+                    val={k:v}                 
+                conditions.append({p:val})
+        if op is None:
+            return (conditions)   
+        else:
+            return [{op:conditions}]    
+        
+    def build_mongo_existquery(self, params):
+        '''params: dictionary of {xpath for search parameter name:(value, doc_type)} where value is bool(True or False) only'''
+        '''Assume search value be case insensitive.'''
+        query=[]
+        for k, v in params.items():
+            val= {"$exists":v[0]}
+            query= query + [{"AMDoc."+x +k:val} for x in v[1]] 
+        return query
+
+    def build_mongo_evalquery(self, params):
+        '''params: dictionary of {xpath for search parameter name:(value, doc_type)}'''
+        '''Assume search value be case insensitive.'''
+        query=[]
+        for k, v in params.items():
+            val={"$regex":v[0], "$options":'i'} # '(?i)' + SEARCH_PARAM + '(?-i)' 
+            query= query + [{"AMDoc."+x +k:val} for x in v[1]] 
+        return query        
+    
+    def build_mongo_query1(self, op1, op, params, doc_types):
+        '''params: dictionary of {xpath for search parameter name:value}'''
+        '''Assume  that search value be case insensitive.'''
+        query = []
+        for doc in doc_types:
+            dic = {}
+            clause=[]
+            for k, v in params.items():
+                val={op:v, "$options":'i'}
+                clause= clause + [{"AMDoc."+doc +k:val}] 
+            dic[op1] = clause
+            query.append(dic)
+        return query                                                                          
+
+    def get_pids_and_elements(self, docs, doc_type, elt_name):
+        '''
+        return dict of documents keyed by their name.
+        It is assumed (i.e. precondition) that the document has a name element inherited from AMResource
+        and that this name is unique for all these documents
+        '''
+        PID_BY_NAME={}
+        for t in docs.itertuples():
+            root = ET.fromstring(t.xml_content)    
+            name=root.findall(f'{doc_type}/name')[0].text
+            pids=root.findall('pid')
+            elt_vals=root.findall('.//' + elt_name)
+            if len(elt_vals) ==1:
+                elt_val = elt_vals[0].text
+            else:
+                elt_val = None
+                print(f"More than one value exists for search parameter.") #TODO Improve warning.
+            if len(pids) == 1:
+                pid = pids[0].text
+            else:
+                pid = None
+                print(f"PID for {name} not specified")
+            PID_BY_NAME[name]=(pid, elt_val)
+        return PID_BY_NAME
+
+    def get_doctypes_pids_elements(self, docs, elt_name):    
+        PID_BY_NAME={}
+        for t in docs.itertuples():
+            root = ET.fromstring(t.xml_content) 
+            doctype = root[1].tag
+            if doctype is None:
+                print(f"Document Type is not specified")
+                return
+
+            name=root.findall(f'{doctype}/name')[0].text
+            pids=root.findall('pid')
+            elt_vals=root.findall('.//' + elt_name)
+
+            if len(elt_vals) ==1:
+                elt_val = elt_vals[0].text
+            else:
+                elt_val = None
+                print(f"More than one value exists for search parameter.") #TODO Improve warning.
+            if len(pids) == 1:
+                pid = pids[0].text
+            else:
+                pid = None
+                print(f"PID for {name} not specified")
+            PID_BY_NAME[name]=(doctype, pid, elt_val)
+        return PID_BY_NAME       
+    
     def query_all_amblobs(self):
         '''
         return AMDoc for AMBlob with given checksum
@@ -488,6 +659,15 @@ class AMBench2022(CDCS):
         MQ={"AMBlob.handle": handle}
         return self.mongo_query(MQ)
 
+    def get_blob(self, handle):
+        r = requests.get(handle,verify=False, auth=self.__auth)
+        if r.status_code == 200 and r.content is not None:
+            try:
+                return Image.open(io.BytesIO(r.content))
+            except:
+                pass  # TBD do we want to raise an exception iso returning None
+        return None
+
     def query_amblob_refs(self):
         '''
         utility method find all loaded AMBlobs as a checksum:handle dict
@@ -506,7 +686,7 @@ class AMBench2022(CDCS):
     # Should be from an AMDoc template
     #====================================================
     
-    def upload_amblob_and_blob(self, filename=None, blobbytes=None, image=None):
+    def upload_amblob_and_blob(self, filename=None, blobbytes=None, image=None, workspace='Global Public Workspace'):
         '''
         upload blob for given file or blobbytes and create an AMBlob for it as well.
         if a blob with the same checksum already exists, the corresponding amblob will be returned.
@@ -521,14 +701,20 @@ class AMBench2022(CDCS):
         elif blobbytes is None:
             raise Exception("Must specify one of filename,blobbytes or image")
         if frmt is None:
-            frmt=formatForBytes(blobbytes)
+            frmt=imageFormatForBytes(blobbytes)
 
         checksum=checksum4bytes(blobbytes)
         amblob=self.query_amblob_by_checksum(checksum)
         if amblob is not None:
             return amblob.handle
 
-        handle=self.upload_blob(filename=checksum,blobbytes=blobbytes)
+        # to get a proper name for the blob must not upload the plain byte array but a BytesIO object with a name
+        blobid = f"AMBlob_{checksum}.{frmt.lower()}"
+        blobio = BytesIO(blobbytes)
+        blobio.name=blobid
+        
+        handle=self.upload_blob(filename=blobid, blobbytes=blobio, workspace=workspace)
+        
         amblob=amdoc.AMBlob()
         amblob.checksum=checksum
         amblob.handle=handle

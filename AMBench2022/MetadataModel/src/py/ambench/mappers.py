@@ -6,7 +6,9 @@ from openpyxl_image_loader import SheetImageLoader
 
 from ambench.cdcs_utils import *
 from ambench import amdoc
-# from ambench.mapping.mapping_utils import *
+from ambench.mapping.mapping_utils import *
+
+from lxml import etree
 
 import itertools
 
@@ -14,6 +16,7 @@ import itertools
 # CLASS DEFINITIONS
 ###################
 class AMMapper():
+    DEFAULT_ID_TYPE = 'Internal identifier'
     def __init__(self,ambench2022, DOC_TYPE, CONFIG):
         """
         CONFIG contains pointers to excel files that mapper may need
@@ -21,7 +24,11 @@ class AMMapper():
         self.ambench2022=ambench2022
         self.CONFIG=CONFIG
         self.DOC_TYPE=DOC_TYPE
-        self.ID_DOC_MAP=self.ambench2022.pids_by_name(DOC_TYPE)
+        try:
+            self.ID_DOC_MAP=self.ambench2022.pids_by_name(DOC_TYPE)
+        except:
+            self.ID_DOC_MAP=None
+        self.initPossibleContributors()
         # initialize column labels
         alphabet = list(string.ascii_uppercase)
         alphabets=[f'{a[0]}{a[1]}' for a in itertools.product(alphabet,alphabet)]
@@ -31,7 +38,7 @@ class AMMapper():
         '''
         returns (pic,xml_content) tuple
         '''
-        if ID in self.ID_DOC_MAP:
+        if self.ID_DOC_MAP is not None and ID in self.ID_DOC_MAP:
             return self.ID_DOC_MAP[ID]
         return None
 
@@ -42,7 +49,53 @@ class AMMapper():
             df=xl.parse(s).dropna(how='all') 
             sheets[s]=df
         return sheets
+    
+    def move_excel_header(self, df, n=0):
+        new_header = df.iloc[n] #grab the n-th row for the header
+        df = df[n+1:] #take the data less the header row
+        df.columns = new_header
+        return df
+        
 
+    #Get materialInfo from AMPowder or Material.
+    def get_materialInfo(self,name, source):
+        if source == "AMPowder" or source == "Material":
+            MQ=({f'AMDoc.{source}.name':name})
+        else:
+            return None        
+        df=self.ambench2022.mongo_query(MQ)
+        if len(df) == 1:
+            _xml = df['xml_content'].iloc[0]
+            root=etree.fromstring(_xml.encode('utf-8'))
+            cl = root.xpath(f"/AMDoc/{source}/materialInfo/materialClass/text()")
+            pid = root.xpath("/AMDoc/pid/text()")
+            if len(cl) == 1 and len(pid) == 1:
+                return {'class':cl[0], 'pid':pid[0]}
+            else:
+                raise Exception(f'Wrong number of material class and pid {name}, {source}')
+                                
+        elif len(df)>1: 
+            raise Exception(f'Multiple files for name {name}')
+        else:
+            return None
+        
+    def get_materialInfo_from_pid(self,pid):
+        _xml = maybe_string(self.ambench2022.query_doc_by_pid(pid)['xml_content'])
+        if _xml is not None:  
+            root=etree.fromstring(_xml.encode('utf-8'))
+            cl=root.xpath("/AMDoc//materialInfo/materialClass/text()")
+            pid = root.xpath("/AMDoc//materialInfo/sourceMaterialId/text()")
+            if len(cl) == 1: 
+                if len(pid) == 1:
+                    return {'class':cl[0], 'pid':pid[0]}
+                elif len(pid) == 0:
+                    return {'class':cl[0], 'pid':None}
+                else:
+                    raise Exception(f'Invalid source material Id in database for {pid}') 
+            else:
+                raise Exception(f'Invalid PID type {pid} in get material info. len={len(cl)}, cl={cl}')  
+        else:
+            return None        
 
     def get_existing(self):
         MQ=({f"AMDoc.{DOC_TYPE}": {"$exists": True}})
@@ -155,4 +208,51 @@ class AMMapper():
         pandas_sheet[image_cell_column]=cells
         return blobRefs
     
-    
+    def initPossibleContributors(self):
+        # reads sheets with contributors
+        # creates a dict of Person-s keyed by name
+        self.possible_contributors_email={}  # keyed by email
+        self.possible_contributors_orcid={}  # keyed by email
+        sheets=self.read_excel(self.CONFIG.CONTRIBUTORS_EXCEL_FILE)
+        sheet=sheets[list(sheets.keys())[0]]
+        for t in sheet.itertuples():
+            p=amdoc.Person()
+            p.orcidID = maybe_string(t.ORCID_iD)
+            p.name=maybe_string(t.Contributor_Name)
+            email = maybe_string(t.Email_address)
+            if email is not None:
+                emails = email.lower().split(",")
+                emails = [e.strip() for e in emails]
+                p.email = emails
+                for e in emails:
+                    self.possible_contributors_email[e] = p
+            if p.orcidID is not None:
+                self.possible_contributors_orcid[p.orcidID]=p
+
+    def findContributors(self,contributors,role=None):
+        # with input a comma-separated-list of emails and/or orcids, find the contributors
+        contributors = maybe_string(contributors)
+        if contributors is None:
+            return None
+        words=[x.strip() for x in contributors.split(",")]
+        person=None
+        contributors=[]
+        for word in words:
+            word=word.strip()
+            if "@" in word:  # assume email
+                person=self.possible_contributors_email.get(word.lower())
+            elif '-' in word:   # assume orcid
+                person=self.possible_contributors_orcid.get(word)
+                
+            if person is None:
+                pass #TODO Use warning
+#                 raise Exception(f"Contributor {word} does not exist in the contributors dictionary.")
+            else:
+                contributor=amdoc.Contributor()
+                contributor.person=person
+                if role is not None:
+                    contributor.role=role
+                contributors.append(contributor)
+        if len(contributors) == 0:
+            contributors = None
+        return contributors

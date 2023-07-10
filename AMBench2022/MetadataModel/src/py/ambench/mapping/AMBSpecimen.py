@@ -90,27 +90,45 @@ class Mapper(AMMapper):
 
         parentId=t.ParentID
         parentType=t.ParentType
+        parent=amdoc.SpecimenParent()
         if parentType == 'BuildPart':
             amd = self.ambench2022.query_buildproduct_amdoc('AMBuildPart',parentId)
-            spec.buildPartId = amd.pid 
-            spec.benchmarkId = amd.AMBuildPart.benchmarkId 
-            spec.buildPlateId = amd.AMBuildPart.buildPlateId 
+            if amd is not None:
+                spec.benchmarkId = amd.AMBuildPart.benchmarkId 
+                spec.materialInfo=amd.AMBuildPart.materialInfo
+                parent.buildPartId=amd.pid
+                parent.buildPlateId=amd.AMBuildPart.buildPlateId
         elif parentType == 'Material':
             amd = self.ambench2022.query_buildproduct_amdoc('Material',parentId)
-            spec.materialId = amd.pid 
-#             spec.benchmarkId = amd.Material.benchmarkId # do this?
-            
+            if amd is not None:
+                spec.materialInfo=amd.Material.materialInfo
+                spec.materialInfo.sourceMaterialId=amd.pid
+                parent.materialId=amd.pid
+        else:
+            parent=None
+        if parent is not None:
+            spec.parent=parent
+        
         spec.status=maybe_string(t.Current_condition)
         # TBD some combination of description,purpose,comments,specification?
         spec.purpose=maybe_string(t.Measurement_Requirements)  # WRONG?
-        spec.identifier=[doc_id]
+#         spec.identifier=[doc_id]
+
+        identifier=amdoc.identifier()
+        identifier.id=doc_id
+        identifier.type=AMMapper.DEFAULT_ID_TYPE
+        spec.identifier=[identifier]
 
         owner = maybe_string(t.Owner)
-        if owner is not None and len(owner) > 0:
-            person=amdoc.Person()
-            spec.primaryContact=person
-            person.name=owner
-
+        primaryContact = None
+        if owner is not None and len(t.Owner) > 0:
+            if '@' in owner:
+                primaryContact = self.possible_contributors_email.get(owner.lower())
+            elif '-' in owner:
+                primaryContact = self.possible_contributors_orcid.get(owner)
+            if primaryContact is not None:
+                spec.primaryContact = primaryContact
+            
         #------------------------------------------------------------------------------
         # Notes:
         # TBD mapping also measurement_requirements and _method. Should we ignore those?
@@ -159,12 +177,16 @@ class Mapper(AMMapper):
                 step.completeDate=maybe_dateTime(t.Processing_date_completed)
             except:
                 print("problem with date",t.Processing_date_completed)
-            
+                
             poc=maybe_string(t.Processing_POC)
+            primaryContact = None
             if poc is not None and len(poc)>0: # TODO lookup more info on person from the Contributors excel sheet
-                p=amdoc.Person()
-                p.name=poc
-                step.primaryContact=p
+                if '@' in poc:
+                    primaryContact = self.possible_contributors_email.get(poc.lower())
+                elif '-' in poc:
+                    primaryContact = self.possible_contributors_orcid.get(poc)
+                if primaryContact is not None:
+                    step.primaryContact = primaryContact
             
             blobrefs=[]
             for t in df.itertuples():
