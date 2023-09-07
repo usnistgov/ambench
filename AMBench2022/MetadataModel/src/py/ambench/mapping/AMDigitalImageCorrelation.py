@@ -1,3 +1,7 @@
+#=================================================
+# Mapper class for AMDigitalImageCorrelation. 
+#=================================================
+
 import io
 import pandas
 import string
@@ -17,22 +21,33 @@ import sys
 class Mapper(AMMeasurementMapper):  
     DOC_TYPE='AMDigitalImageCorrelation'
     SHEET='Digital_image_correlation'
-#     IMAGE_COLUMN='Specimen_measurement_geometry_diagrams_and_photos'
-#     IMAGE_COLUMN_CELLS=IMAGE_COLUMN+"__cells"
 
     def __init__(self, ambench2022, CONFIG):
         super().__init__(ambench2022,Mapper.DOC_TYPE, CONFIG)
-
-    def mechanicaltesting_toxml(self,i, df,outfolder,columns, pids, images):
+        
+    def map_from_excel(self, outfolder,verbose=False):
+        return self.do_map(outfolder,Mapper.SHEET,verbose)
+        
+    def map_fromtable_toxml(self,i, df, anno_df, docu_df, outfolder,columns, pids, images):
+        '''
+        df: metadata data frame for a single measurement of a single measurement type.
+        anno_df: column description data frame defined in the measurement Excel spreadsheet.
+        docu_t: metadata data frame describing the measurement type of the metadata given in df. 
+        outfolder: local folder where a resultant XML file is written.
+        columns: list of column names defined in the sheet 
+        pids: All PIDS existing in a CDCS database.
+        images: All images existing in a CDCS database.
+        '''
 
         t = df.iloc[0]
-        identifier=createId(t.Measurement_identifier, "Internal")
+        an = anno_df.iloc[1] #Annotation        
+        identifier=createId(t.Measurement_identifier, AMMapper.DEFAULT_ID_TYPE)
         ID = identifier.id
         pid = self.find_pid4id(ID)
         is_new=False
         amroot=amdoc.AMDoc()
-        measurement=amdoc.MechanicalTestingMeasurement()
-        amroot.AMMechanicalTesting=measurement
+        measurement=amdoc.DigitalImageCorrelationMeasurement()
+        amroot.AMDigitalImageCorrelation=measurement
         if pid is None:
             amroot.pid=""
             print("Did not find:",ID,"new doc from excel")
@@ -41,9 +56,11 @@ class Mapper(AMMeasurementMapper):
             print("Found:",ID," ==> ",pid,"update doc from excel")
             amroot.pid=pid
 
-#########################################        
-        measurement = self.fillTemplateMeasurement(measurement, identifier, df, columns, pids, images, '%Y-%m-%d %H:%M:%S')
-    
+        try:
+            measurement = self.fillTemplateMeasurement(measurement, identifier, df, docu_df, columns, pids, images, '%Y-%m-%d %H:%M:%S')
+        except:
+            print(traceback.format_exc(), file=sys.stderr, flush=True)
+              
 #             Instrument Custom metadata and Experiment Configuration ######
         sens_dfs=[]
         try:
@@ -91,10 +108,10 @@ class Mapper(AMMeasurementMapper):
                     sens_ref.instrumentName = ins_name
                     sens_ref.detector = name
                     configObj.associatedInstrument = [sens_ref] 
-                    add2ObjectType(configObj, k="Approximate_sample_camera_distance", v=newPhysicalQuantity(r.Approximate_sample_camera_distance, u=r.Approximate_sample_camera_distance_units), na = 'NA')
-                    add2ObjectType(configObj, k="Frame_rate", v=newPhysicalQuantity(r.Frame_rate, u=r.Frame_rate_units), na = 'NA')
-                    add2ObjectType(configObj, k="Exposure_time", v=newPhysicalQuantity(r.Exposure_time, u=r.Exposure_time_units), na = 'NA')
-                    add2ObjectType(configObj, k="Aperture", v=r.Aperture, na = 'NA')
+                    add2ObjectType(configObj, k="Approximate_sample_camera_distance", v=newPhysicalQuantity(r.Approximate_sample_camera_distance, u=r.Approximate_sample_camera_distance_units), na = 'NA', desc=an.Approximate_sample_camera_distance)
+                    add2ObjectType(configObj, k="Frame_rate", v=newPhysicalQuantity(r.Frame_rate, u=r.Frame_rate_units), na = 'NA', desc=an.Frame_rate)
+                    add2ObjectType(configObj, k="Exposure_time", v=newPhysicalQuantity(r.Exposure_time, u=r.Exposure_time_units), na = 'NA', desc=an.Exposure_time)
+                    add2ObjectType(configObj, k="Aperture", v=r.Aperture, na = 'NA', desc=an.Aperture)
                     configObjs.append(configObj)
                     
             sens = [s for s in sens if s is not None]
@@ -138,19 +155,19 @@ class Mapper(AMMeasurementMapper):
                 
                 do = amdoc.DataObject()
                 do.name = "DIC callibration"
-                add2ObjectType(do,k="DIC_grid_calibration_description", v=newDigitalArtifact(typ="file", url= dt.DIC_grid_calibration_description, urlna='NA'), na='NA')
-                add2ObjectType(do,k="DIC_grid_calibration_spacing", v=newPhysicalQuantity(dt.DIC_grid_calibration_spacing, u=dt.Spacing_units, na = 'NA'))                
-                add2ObjectType(do,k="DIC_grid_calibration_images", v=newDigitalArtifact(typ="file", url= dt.DIC_grid_calibration_images, urlna='NA'), na='NA')
-                add2ObjectType(do,k="DIC_hybrid_calibration_images", v=newDigitalArtifact(typ="file", url= dt.DIC_hybrid_calibration_images, urlna='NA'), na='NA')
-                add2ObjectType(do,k="Vic3D_DIC_calibration_file", v=newDigitalArtifact(typ="file", url= dt.Vic3D_DIC_calibration_file, urlna='NA'), na='NA')
+                add2ObjectType(do,k="DIC_grid_calibration_description", v=newDigitalArtifact(typ="file", url= dt.DIC_grid_calibration_description, urlna='NA'), na='NA', desc=an.DIC_grid_calibration_description)
+                add2ObjectType(do,k="DIC_grid_calibration_spacing", v=newPhysicalQuantity(dt.DIC_grid_calibration_spacing, u=dt.Spacing_units, na = 'NA'), desc=an.DIC_grid_calibration_spacing)                
+                add2ObjectType(do,k="DIC_grid_calibration_images", v=newDigitalArtifact(typ="file", url= dt.DIC_grid_calibration_images, urlna='NA'), na='NA', desc=an.DIC_grid_calibration_images)
+                add2ObjectType(do,k="DIC_hybrid_calibration_images", v=newDigitalArtifact(typ="file", url= dt.DIC_hybrid_calibration_images, urlna='NA'), na='NA', desc=an.DIC_hybrid_calibration_images)
+                add2ObjectType(do,k="Vic3D_DIC_calibration_file", v=newDigitalArtifact(typ="file", url= dt.Vic3D_DIC_calibration_file, urlna='NA'), na='NA', desc=an.Vic3D_DIC_calibration_file)
                 if len(do.field) > 0:
                     addDO2DataSet(ds, do, by=d_id)
 
                 do = amdoc.DataObject()
                 do.name = "DIC noise"
-                add2ObjectType(do,k="DIC_noise_images", v=newDigitalArtifact(typ="folder", url= dt.DIC_noise_images, urlna='NA'), na='NA')
-                add2ObjectType(do,k="Vic3D_DIC_noise_file", v=newDigitalArtifact(typ="file", url= dt.Vic3D_DIC_noise_file, urlna='NA'), na='NA')
-                add2ObjectType(do,k="Vic3D_processed_noise_data", v=newDigitalArtifact(typ="folder", url= dt.Vic3D_processed_noise_data, urlna='NA'), na='NA')
+                add2ObjectType(do,k="DIC_noise_images", v=newDigitalArtifact(typ="folder", url= dt.DIC_noise_images, urlna='NA'), na='NA', desc=an.DIC_noise_images)
+                add2ObjectType(do,k="Vic3D_DIC_noise_file", v=newDigitalArtifact(typ="file", url= dt.Vic3D_DIC_noise_file, urlna='NA'), na='NA', desc=an.Vic3D_DIC_noise_file)
+                add2ObjectType(do,k="Vic3D_processed_noise_data", v=newDigitalArtifact(typ="folder", url= dt.Vic3D_processed_noise_data, urlna='NA'), na='NA', desc=an.Vic3D_processed_noise_data)
                 if len(do.field) > 0:
                     addDO2DataSet(ds, do, by=d_id)
                 
@@ -165,11 +182,11 @@ class Mapper(AMMeasurementMapper):
                 if len(do.field) > 0:
                     addDO2DataSet(ds, do, by=d_id)
                 
-            if isNewDS == True and len(ds.dataObject):
+            if isNewDS == True and len(ds.dataObject) >0:
                 out.dataSet.append(ds)
             isNewDS, ds = self.getDataSet(out, 'Processed Data')
             add2DataSet(ds,k="Processed_strain_field_data", v=newDigitalArtifact(typ="file", url= t.Processed_strain_field_data), na='NA')
-            if isNewDS == True and len(ds.dataObject):
+            if isNewDS == True and len(ds.dataObject)>0:
                 out.dataSet.append(ds)
             measurement.results = out
         except:
@@ -182,34 +199,3 @@ class Mapper(AMMeasurementMapper):
             f.write(prettify(amroot.toxml("utf-8").decode('utf-8')))
         return xmlfile,is_new
         
-        
-    def map_from_excel(self, outfolder,verbose=False):
-        EXCEL_FILE=self.CONFIG.MEAS_EXCEL_FILE
-        CONTRIBUTORS_EXCEL_FILE=self.CONFIG.CONTRIBUTORS_EXCEL_FILE
-        ID_DOC_MAP=self.ambench2022.docs_by_name_AMDOC(Mapper.DOC_TYPE)
-
-        sheets=self.read_excel(EXCEL_FILE)
-        sheet=sheets[Mapper.SHEET] 
-        pyxl_doc = openpyxl.load_workbook(EXCEL_FILE)
-        pyxl_sheet = pyxl_doc[Mapper.SHEET]
-        
-        # check whether images exist for any of the processing steps for these specimens and load those
-        # returned a dict checksum:handle of all loaded blobs
-        # first retrieve images, then throw uhman_readonly columns. otherwise the matching between cells wiht images goes awry
-        
-        if Mapper.IMAGE_COLUMN not in sheet.columns:
-            sheet[Mapper.IMAGE_COLUMN]=''        
-        images = self.retrieveAndLoadImages(sheet,pyxl_sheet,Mapper.IMAGE_COLUMN, Mapper.IMAGE_COLUMN_CELLS)
-        sheet = sheet[sheet['Human_readonly'] != 'Y']
-
-        docs={}
-        pids_amspecimen = self.ambench2022.pids_by_name('AMBSpecimen')
-        pids={name:(pid,'AMBSpecimen') for name,pid in pids_amspecimen.items()}
-        pids_ambuildpart = self.ambench2022.pids_by_name('AMBuildPart')
-        pids={**pids,**{name:(pid,'AMBuildPart') for name,pid in pids_ambuildpart.items()}}
-
-        for i, df in sheet.groupby('Measurement_identifier'):
-#             print(i, "\n", sheet.columns)
-            xmlfile,is_new=self.mechanicaltesting_toxml(i, df,outfolder,sheet.columns, pids, images)
-            docs[xmlfile]=is_new
-        return docs      

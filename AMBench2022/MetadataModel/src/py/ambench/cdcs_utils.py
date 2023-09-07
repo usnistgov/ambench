@@ -1,8 +1,13 @@
-# cdcs access libs
+#=======================================================================
+# Python module which contains utility functions that provide 
+# access to an instance of NIST Configurable Data Curation System (CDCS) 
+# database.
+#
+#=======================================================================
+
 import os
 import io
 import pprint
-# import lxml
 import lxml.etree as ET
 import xmlschema
 import xml.dom.minidom
@@ -28,7 +33,7 @@ from ambench import amdoc
 
 def xpath(xml_content, xpath_expression):
     '''
-    TODO check whether xml_content should still be encoded
+    TODO: check whether xml_content should still be encoded or not
     '''
     if type(xml_content) == str:
         xml_content=xml_content.encode('utf-8')
@@ -44,7 +49,7 @@ def checksum4image(image):
 
 def pil2bytes(image):
     '''
-    transform a PIL image to a bytearray.
+    Transform a PIL image to a bytearray.
     NOTE this is *not* using tobyes(), which may produce a long, uncompressed version.
     '''
     imgByteArr = io.BytesIO()
@@ -61,13 +66,13 @@ def imageFormatForBytes(blobbytes):
 
 def pretty(_xml):
     '''
-    pretty print an XML string
+    Pretty print an XML string
     '''
     print(prettify(_xml))
 
 def prettify(_xml):
     '''
-    return "pretty" formatted XML string
+    Return "pretty" formatted XML string
     '''
     dom = xml.dom.minidom.parseString(_xml)
     pretty_xml_as_string = dom.toprettyxml(indent="  ")
@@ -75,6 +80,8 @@ def prettify(_xml):
     return r
 
 def find_todo(root, title_prefix=""):
+    '''Find schema files located in root folder'''
+    
     root=os.path.join(root, '') # ensure root ends with a '/'
     schema_files=glob.glob(f"{root}*.xsd")
     todo={}
@@ -91,27 +98,21 @@ def find_todo(root, title_prefix=""):
             print(schema_file,e)
     return todo
     
-class AMBenchError(Exception):
-    '''
-    Represent an errors occurring during execution of AMBench2022 API calls.
-    '''
-    # error codes
-    UNKNOWN_ERROR = 1
-    DOC_EXISTS = 2
-    DOC_MALFORMED = 4
-    
-    def __init__(self,message,error_code=UNKNOWN_ERROR, cause=None):
-        '''
-        cause is assumed to be a dict that can be filled by the method rasiing the error.
-        E.g. for DOC_EXISTS error it could be the PID of the existing document
-        '''
-        super().__init__(message)
-        self.error_code = error_code
-        self.cause = cause
-    
 class AMBench2022(CDCS):
+    '''
+    Represents AMBench2022 CDCS instance. It is a wrapper class of which base class is CDCS class from pycdcs 
+    (https://github.com/usnistgov/pycdcs). It has additional methods including querying, and uploading 
+    XML schemas and documents in the CDCS instance.
+    '''
     def __init__(self,template,url,auth,workspace='Global Public Workspace'):
-        super().__init__(url, auth=auth, verify=False)
+        
+        # If username is an empty string login to CDCS anonymously.
+        if auth[0] == '':
+            super().__init__(url, username='', password='', verify=False)
+            auth=('','')
+        else:
+            super().__init__(url, auth=auth, verify=False)
+        
         self.url = url
         self.__auth=auth
         self.__init_template(template)
@@ -128,7 +129,7 @@ class AMBench2022(CDCS):
             raise Exception("This AMBench2022 instance does not have a valid template yet")
 
     #====================================================
-    # functions for loading a new (version of a) template
+    # Functions for loading a new (version of a) template
     #====================================================
     
     def all_versions(self):
@@ -138,6 +139,7 @@ class AMBench2022(CDCS):
         return len(self.all_versions())
     
     def loadSchema(self,xsd_folder,title_prefix, template_file):
+        '''Upload schemas located in xsd_folder'''
         try:
             todo=find_todo(xsd_folder,title_prefix=title_prefix)
             for k,xsd in todo.items():
@@ -151,14 +153,14 @@ class AMBench2022(CDCS):
             raise e
 
     def load_xsd_as_template(self,auth,url, schema_file, schema_title, dependencies_dict=None):
-#         curator=CDCS(url,auth=auth,verify=False)
+
         workspace=self.get_workspace()
         workspace_id = workspace['id']
 
-        #
-        # see if template title already exists,  
-        # TODO should update it if it does, insert new if it does not
-        #
+        '''
+        Check if template title already exists.  
+        TODO: should update it if template exists, insert new if it does not.
+        '''
         template_upload_url = '/rest/template-version-manager/global/'
         turl = url + template_upload_url
         print('status: checking for template to use when uploading xml files ...')
@@ -170,7 +172,7 @@ class AMBench2022(CDCS):
         for rec in response_content:
             if schema_title == rec['title']:
                 #
-                #   Found it, use this instead
+                #   Found template, use this instead
                 #
                 template_id = rec['id']
                 print('Found template',schema_title,'at id=',template_id)
@@ -206,10 +208,12 @@ class AMBench2022(CDCS):
 
         return template_id
 
-    # load the specified xsd, possibly first loading the ones it depends on
-    # write files also to outdir
-    # if TEST==True, do not actually load, only write schema
     def load_xsd(self,xsd, todo):
+        ''' 
+        load the specified xsd, possibly first loading the ones it depends on
+        write files also to outdir
+        If TEST==True, do not actually load, only write schema
+        '''
         if xsd['id'] is not None:  # already loaded
             return xsd['id']
         dom=xsd['dom']
@@ -218,7 +222,7 @@ class AMBench2022(CDCS):
         for schLoc in schLocs:
             if schLoc not in todo:
                 print("Found schemaLocation not contained in list of schemas to be handled:",schLoc)
-                continue   # TODO should not ignore
+                continue   #TODO: should not ignore
             other=todo[schLoc]
             otherid=self.load_xsd(other,todo)
             dependencies_dict[schLoc]=str(otherid)
@@ -233,9 +237,9 @@ class AMBench2022(CDCS):
         xsd['id']=template_id
         return template_id
             
-    #====================================================
-    # functions for retrieving template as json
-    #====================================================
+    #===============================================================
+    # Functions for retrieving template as JSON from a CDCS instance
+    #===============================================================
     def retrieve_template_by_id(self,template_id):
         turl = self.url + f'/rest/template/{template_id}/'
         response = requests.get( turl, verify=False, auth=self.__auth)
@@ -245,8 +249,8 @@ class AMBench2022(CDCS):
 
     def retrieve_all_template_files(self,all_sofar,template_id=None):
         '''
-        retrieve all the XML schema files required for a given template.
-        I.e. the schema file itself and all its dependencies, recursively
+        Retrieve all the XML schema files required for a given template.
+        I.e. the schema file itself and all its dependencies, recursively.
         '''
         if template_id is None:
             self.checkTemplate()
@@ -261,10 +265,14 @@ class AMBench2022(CDCS):
 
     def local_copy_template_files(self,outfolder = None):
         '''
-        retrieve all files for the current template
-        update the XSD-s so that includes point to local copy of the file, assumed to be in the same folder
-        write these updated XSD string to the specified outfolder
-        return them sorted by dependency graph
+        Create local copy of schema files for the current template 
+        in order to create a local schema validator.
+         
+        1. Retrieve all XSD files for the current template
+        2. Update the XSD-s so that the include elements point to local copy of the file, 
+        assumed to be in the same folder
+        2. Write these updated XSD string to the specified outfolder
+        3. Return them sorted by schema dependency graph.
         '''
         all_xsds={}
         self.retrieve_all_template_files(all_xsds)
@@ -293,7 +301,7 @@ class AMBench2022(CDCS):
     
     def sort_xsds(self,_id,dependencies,ranked=[]):
         '''
-        sort based on dependency graph. if cycles may be wrong.
+        Sort XSDs based on dependency graph. There must be no cyclic dependencies.
         '''
         if _id in ranked:
             return
@@ -303,10 +311,13 @@ class AMBench2022(CDCS):
         ranked.append(_id)
     
     def create_schema_validator(self,tmp_folder=None):
+        '''
+        Create local schema validator.
+        '''
         all_xsds=self.local_copy_template_files(tmp_folder)
         if tmp_folder is None:
-            # when building the schemas from strings the includes cannot be found, hence warnings are issued
-            # it seems though the schema is properly built
+            # When building the schemas from strings the include elements cannot be found, 
+            # hence warnings are issued
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 for i,d in enumerate(all_xsds):
@@ -324,32 +335,26 @@ class AMBench2022(CDCS):
             raise Exception("Cannot make valid schema validator from current template")
         return VALIDATOR
     
-    #====================================================
-    # various utility query functions
-    #====================================================
+    #=================================================================
+    # Various utility functions which query AMBench 2022 CDCS instance
+    # using CDCS REST API and pycdcs (https://github.com/usnistgov/pycdcs)
+    #=================================================================
     def mongo_query(self,MQ):
         '''
-        execute a mongo query vs the current template
-        NB setting param to False
+        Execute a Mongo query for the specified template.
         '''
         self.checkTemplate()
         return self.query(template=self.template,mongoquery=MQ, parse_dates=False)
 
-    def query_template_documents(self):
-        '''
-        return all AMBench2022 documents for the current template
-        '''
-        return self.query_docs_by_type(None)
-    
     def query_all_docs(self):
         '''
-        return all AMBench2022 documents for the current template
+        Return all AMBench2022 documents for the current template
         '''
         return self.query_docs_by_type(None)
 
     def query_docs_by_type(self,doc_type=None):
         '''
-        return all AMBench2022 documents of the specified for the current template.
+        Return all AMBench2022 XML documents of the specified for the current template.
         All these documents start with the element <AMDOC> and have a child element <{DOC_TYPE}>
         '''
         docs="AMDoc" if doc_type is None else "AMDoc."+doc_type
@@ -358,7 +363,7 @@ class AMBench2022(CDCS):
 
     def query_doc_by_pid(self,pid):
         '''
-        return the one AMBench2022 document with the given pid as a tuple
+        Return the one AMBench2022 XML document with the given PID as a tuple
         '''
         MQ=({"AMDoc.pid": pid})
         df = self.mongo_query(MQ)
@@ -369,8 +374,8 @@ class AMBench2022(CDCS):
 
     def query_buildproduct_amdoc(self,doc_type,name):
         '''
-        return the pyxb verison of a AMResource with the specified namespecified.
-        name suggests buildproduct, but any doc_type with a name child element can be queried
+        Return the pyxb version of a AMResource with the specified name.
+        Here buildproduct implies any doc_type with a 'name' child element of AMDoc can be queried
         '''
         MQ=({f"AMDoc.{doc_type}.name": name})
         bp = self.mongo_query(MQ)
@@ -379,16 +384,16 @@ class AMBench2022(CDCS):
             amd=amdoc.CreateFromDocument(bp['xml_content'].values[0])
             return amd
         elif len(bp)>1:
-            # TODO decide whether we should return all the documents
+            # TODO: decide whether we should return all the documents
             raise Exception(f'Multiple {doc_type}-s for name {name}')
         else:    
             return None    
     
     def pids_by_name(self, DOC_TYPE):
         '''
-        return dict of documents keyed by their name.
-        It is assumed (i.e. precondition) that the document has a name element inherited from AMResource
-        and that this name is unique for all these documents
+        Return dict of PIDs of documents keyed by their name.
+        It is assumed (i.e. precondition) that the document has a name element inherited 
+        from AMResource and that this name is unique for all these XML documents.
         '''
         docs=self.query_docs_by_type(DOC_TYPE)
         PID_BY_NAME = {}
@@ -406,9 +411,9 @@ class AMBench2022(CDCS):
     
     def docs_by_name_AMDOC(self,DOC_TYPE):
         '''
-        return dict of documents keyed by their name.
-        It is assumed (i.e. precondition) that the document has a name element inherited from AMResource
-        and that this name is unique for all these documents
+        Return dict of documents keyed by their name.
+        It is assumed (i.e. precondition) that the document has a name element 
+        inherited from AMResource and that this name is unique for all these documents
         '''
         docs=self.query_docs_by_type(DOC_TYPE)
         DOCS_BY_NAME = {}
@@ -420,35 +425,10 @@ class AMBench2022(CDCS):
             DOCS_BY_NAME[name]=amroot
         return DOCS_BY_NAME
     
-    def query_all_buildplates(self):
-        '''
-        input parameter is a cdcs instance
-        '''
-        return self.query_docs_by_type('AMBuildPlate')
-
-    def query_buildparts_for_plate(self,platePID):
-        '''
-        input parameter 'ambench2022' is a cdcs instance
-        '''
-        MQ=({"AMDoc.AMBuildPart.buildPlateId": platePID})
-        return self.mongo_query(MQ)
-
-    def query_buildplatePID(self,name):
-        '''
-        retrieve BuildPlate pid for buildplate with specified name
-        '''
-        MQ=({"AMDoc.AMBuildPlate.name": name})
-        bp=self.mongo_query(MQ)
-        if len(bp) == 1:
-            return self.retrievePID(bp['xml_content'].values[0])
-        elif len(bp)>1:
-            raise Exception(f'Multiple build plates for name {name}')
-        else:    
-            return None
-
     def query_buildplate_amdoc(self, name):
         '''
-        return AMDoc for buildplate with given name
+        Return AMDoc for build plate with given name.
+        Must return a single document.
         '''
         MQ=({"AMDoc.AMBuildPlate.name": name})
         bp=self.mongo_query(MQ)
@@ -462,7 +442,14 @@ class AMBench2022(CDCS):
             return None    
 
     def unpack_result(self, docs, *elt_names):  
-        '''elt_names: List of xml element names except DEFAULT_COLS to include in the query result.'''
+        '''
+        Return docs transformed into pandas data frame  by adding columns corresponding to 
+        given elt_names in given docs.
+        
+        elt_names: List of XML element names to be included in query results
+        excluding default element names listed in dict 'row'
+        
+        '''
         row = {'name':[], 'doc_type':[], 'pid':[]}    
         for t in docs.itertuples():
             root = ET.fromstring(t.xml_content) 
@@ -495,6 +482,9 @@ class AMBench2022(CDCS):
 
 
     def iterate_element_tree(self, elt_name, root):
+        '''
+        Return list of values of given elt_name
+        '''
         elt_val = []
         for e in root.findall('.//' +elt_name):
             if e.text:
@@ -508,138 +498,16 @@ class AMBench2022(CDCS):
         else:
             return elt_val        
         
-    def build_mongo_query(self, list_join_op, *pars):
-        q = []
-        for par in pars:
-            doctypes= par[0]
-            cls = par[1]
-            op = cls['join_op']
-            if doctypes is None:
-                q = q + self.build_mongo_query_condition(None, op, *cls['conditions'])
-            else:
-                for d in doctypes: #For each doctype
-                    q = q + self.build_mongo_query_condition(d, op, *cls['conditions'])
-        if list_join_op is not None:
-            return {list_join_op:q}
-        else:
-            return q
-
-    def build_mongo_query_condition(self, d, op, *conds):
-        conditions = []
-        for con in conds:
-            path = con['path']
-            if len(path) == 1:
-                if path[0] == 'pid':
-                    p = "AMDoc."+path[0]
-                else:
-                    p = "AMDoc."+d +'.'+ path[0]
-            else:
-                p = "AMDoc."+path[1] +'.'+path[0]
-            value = con['value']
-            for k, v in value.items():
-                if k == '$regex': 
-                    val={k:v,  '$options': 'i'}
-                else:
-                    val={k:v}                 
-                conditions.append({p:val})
-        if op is None:
-            return (conditions)   
-        else:
-            return [{op:conditions}]    
-        
-    def build_mongo_existquery(self, params):
-        '''params: dictionary of {xpath for search parameter name:(value, doc_type)} where value is bool(True or False) only'''
-        '''Assume search value be case insensitive.'''
-        query=[]
-        for k, v in params.items():
-            val= {"$exists":v[0]}
-            query= query + [{"AMDoc."+x +k:val} for x in v[1]] 
-        return query
-
-    def build_mongo_evalquery(self, params):
-        '''params: dictionary of {xpath for search parameter name:(value, doc_type)}'''
-        '''Assume search value be case insensitive.'''
-        query=[]
-        for k, v in params.items():
-            val={"$regex":v[0], "$options":'i'} # '(?i)' + SEARCH_PARAM + '(?-i)' 
-            query= query + [{"AMDoc."+x +k:val} for x in v[1]] 
-        return query        
-    
-    def build_mongo_query1(self, op1, op, params, doc_types):
-        '''params: dictionary of {xpath for search parameter name:value}'''
-        '''Assume  that search value be case insensitive.'''
-        query = []
-        for doc in doc_types:
-            dic = {}
-            clause=[]
-            for k, v in params.items():
-                val={op:v, "$options":'i'}
-                clause= clause + [{"AMDoc."+doc +k:val}] 
-            dic[op1] = clause
-            query.append(dic)
-        return query                                                                          
-
-    def get_pids_and_elements(self, docs, doc_type, elt_name):
-        '''
-        return dict of documents keyed by their name.
-        It is assumed (i.e. precondition) that the document has a name element inherited from AMResource
-        and that this name is unique for all these documents
-        '''
-        PID_BY_NAME={}
-        for t in docs.itertuples():
-            root = ET.fromstring(t.xml_content)    
-            name=root.findall(f'{doc_type}/name')[0].text
-            pids=root.findall('pid')
-            elt_vals=root.findall('.//' + elt_name)
-            if len(elt_vals) ==1:
-                elt_val = elt_vals[0].text
-            else:
-                elt_val = None
-                print(f"More than one value exists for search parameter.") #TODO Improve warning.
-            if len(pids) == 1:
-                pid = pids[0].text
-            else:
-                pid = None
-                print(f"PID for {name} not specified")
-            PID_BY_NAME[name]=(pid, elt_val)
-        return PID_BY_NAME
-
-    def get_doctypes_pids_elements(self, docs, elt_name):    
-        PID_BY_NAME={}
-        for t in docs.itertuples():
-            root = ET.fromstring(t.xml_content) 
-            doctype = root[1].tag
-            if doctype is None:
-                print(f"Document Type is not specified")
-                return
-
-            name=root.findall(f'{doctype}/name')[0].text
-            pids=root.findall('pid')
-            elt_vals=root.findall('.//' + elt_name)
-
-            if len(elt_vals) ==1:
-                elt_val = elt_vals[0].text
-            else:
-                elt_val = None
-                print(f"More than one value exists for search parameter.") #TODO Improve warning.
-            if len(pids) == 1:
-                pid = pids[0].text
-            else:
-                pid = None
-                print(f"PID for {name} not specified")
-            PID_BY_NAME[name]=(doctype, pid, elt_val)
-        return PID_BY_NAME       
-    
     def query_all_amblobs(self):
         '''
-        return AMDoc for AMBlob with given checksum
+        Return AMDocs for all AMBlob.
         '''
         MQ={"AMBlob": {"$exists":True}}
         return self.mongo_query(MQ)
 
     def query_amblob_by_checksum(self, checksum):
         '''
-        return amdoc.AMBlob with given checksum
+        Return amdoc.AMBlob with given checksum
         '''
         MQ={"AMBlob.checksum": checksum}
         bp=self.mongo_query(MQ)
@@ -654,7 +522,7 @@ class AMBench2022(CDCS):
 
     def query_amblob_by_handle(self, handle):
         '''
-        return record(s) for AMBlob with given handle
+        Return record(s) for AMBlob with given handle
         '''
         MQ={"AMBlob.handle": handle}
         return self.mongo_query(MQ)
@@ -670,7 +538,7 @@ class AMBench2022(CDCS):
 
     def query_amblob_refs(self):
         '''
-        utility method find all loaded AMBlobs as a checksum:handle dict
+        Utility method to find all loaded AMBlobs as a checksum:handle dict
         '''
         ch={}
         amblobs=self.query_all_amblobs()
@@ -682,14 +550,14 @@ class AMBench2022(CDCS):
         return ch
 
     #====================================================
-    # functions for uploading and updating XML documents.
+    # Functions for uploading and updating XML documents.
     # Should be from an AMDoc template
     #====================================================
     
     def upload_amblob_and_blob(self, filename=None, blobbytes=None, image=None, workspace='Global Public Workspace'):
         '''
-        upload blob for given file or blobbytes and create an AMBlob for it as well.
-        if a blob with the same checksum already exists, the corresponding amblob will be returned.
+        Upload blob for given file or blobbytes and create an AMBlob for it as well.
+        If a blob with the same checksum already exists, the corresponding amblob will be returned.
         '''
         frmt=None
         if image is not None:
@@ -708,7 +576,8 @@ class AMBench2022(CDCS):
         if amblob is not None:
             return amblob.handle
 
-        # to get a proper name for the blob must not upload the plain byte array but a BytesIO object with a name
+        # To get a proper name for the blob
+        # must not upload the plain byte array but a BytesIO object with a name
         blobid = f"AMBlob_{checksum}.{frmt.lower()}"
         blobio = BytesIO(blobbytes)
         blobio.name=blobid
@@ -727,7 +596,7 @@ class AMBench2022(CDCS):
         
     def upload_data(self, xmlfile=None, xml_content=None, title=None,verbose=False):
         """
-        upload_data: import data file into a curator using specific template.
+        Upload_data: import data file into a curator using specific template.
 
         Parameters:     xmlfile           - data file name to upload, title will be name of the file
           OR
@@ -760,7 +629,7 @@ class AMBench2022(CDCS):
 
     def update_data(self, filename, content=None, title=None, verbose=False):
         """
-        update_data: update data file into a curator using specific template.
+        Update_data: update data file into a curator using specific template.
 
         Parameters:     filename           - data file name to upload, title will be name of the file if not specified
                         title              - title of document
@@ -790,6 +659,9 @@ class AMBench2022(CDCS):
         return response
     
     def delete_amblob_and_blob(self,handle):
+        '''
+        Delete amblob and blob for given handle.
+        '''
         record = self.query_amblob_by_handle(handle)
         if len(record) ==1:
             row=record.loc[0]
@@ -803,7 +675,7 @@ class AMBench2022(CDCS):
 
     def create_QR_code(self,PID,caption):
         '''
-        cxreate a QR code for a PID with a desired caption
+        Create a QR code for a PID with a desired caption
         '''
         qr = qrcode.QRCode(
             version=10,
@@ -829,7 +701,7 @@ class AMBench2022(CDCS):
 
     def retrieve_for_QR(self,DOC_TYPE,targetFolder,swap_host=("test-ambench2022","ambench2022")):
         '''
-        Retrieve all AMBench2022 docs of a given DOC_TYPE.
+        Retrieve all AMBench2022 documents of a given DOC_TYPE.
         Create their QR code from their (generated) <pid>, allowing a swapping of the host part.
         Write both documents and QR images to the target folder
         '''
@@ -866,26 +738,19 @@ class AMBench2022(CDCS):
             return pids[0].text
         return None
 
-    def retrieveBuildPlatePID(self,part_xml):
-        '''
-        Retrieve the buildPlatePID element for an XML document containing an AMDoc element with an AMBuildPart
-        '''
-        root=ET.fromstring(part_xml)#.encode('utf-8'), parser=utf8_parser)
-        pids=root.xpath("/AMDoc/AMBuildPart/buildPlateId",namespaces=root.nsmap)
-        if len(pids) == 1:
-            return pids[0].text
-        return None
-
     def migrate(self,template_id, document_ids):
         '''
-        migrate the specified documents to the specified template.
-        NOTE no checks done of validity, whether documents belong to an older version of the template etc.
-            assumed this is responsibility of the user.
-        TODO make this more robust: e.g. 
-        check the template_id is the latest version for the title.
-        find for the given template all documents belonging to older versions. Maybe only previous version?
-        then check for each doc-to-be-migrated whether it is in that collection.
+        Migrate the specified documents to the specified template.
+        NOTE no checks is done for validity, whether documents belong to an older version 
+        of the template etc assumed this is responsibility of the user.
         '''
+            
+        #TODO make this more robust: e.g. 
+        #check the template_id is the latest version for the title.
+        #find for the given template all documents belonging to older versions or
+        #only previous version.
+        #then check for each doc-to-be-migrated whether it is in that collection.
+        
         url=f"{self.url}rest/data/template/{template_id}/migrate/"
         data={"data":document_ids}
         data=json.dumps(data)

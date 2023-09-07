@@ -1,24 +1,13 @@
-#This is a template for creating CONFIG  class required in the notebook for 
-#mapping an AMDoc type from excel to XML ('Excel to XML.ipynb').
-#
-#Create your own CONFIG class by replacing the followings in class definition:
-# 
-# Replace [USERNAME] and [REPOSITORY] where [USERNAME] and [REPOSITORY] 
-# are your SciServer user name and the name of a folder where the AM Bench GitHub repository 
-# has been cloned, respectively.
-#
-# Enter your paths for ROOT, XSD, SAMPLES_EXCEL_FILE, MEAS_EXCEL_FILE, CONTRIBUTORS_EXCEL_FILE.
-#
-#
 class __CONFIG():
     def __init__(self):
         self.TEMPLATE = "AMDocs"
-        self.AMBENCH_URL = "https://ambench2022.nist.gov/"
+        self.AMBENCH_URL ="https://test-ambench2022.nist.gov/"
+        self.PUBLIC_AMBENCH_URL = "https://ambench2022.nist.gov/"
         self.ROOT = "/path/to/folder/with/cdcs_loading/"
         self.XSD =  "/path/to/folder/with/XSDs/"
-#        self.USER = "*********"
-#        self.PASS = "********"
-        self.pyUTILS_path = "/home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/src/py"
+        self.USER = "*********"
+        self.PASS = "********"
+        self.pyUTILS_path = "/home/idies/workspace/Storage/gerard/persistent/GIT/informatics/src/py"
         self.SAMPLES_EXCEL_FILE = "/path/to/current/SAMPLES_EXCEL_FILE.xslx"
         self.MEAS_EXCEL_FILE = "/path/to/current/MEAS_EXCEL_FILE.xlsx"
         self.CONTRIBUTORS_EXCEL_FILE = "/path/to/current/CONTRIBUTORS_EXCEL_FILE.xlsx"

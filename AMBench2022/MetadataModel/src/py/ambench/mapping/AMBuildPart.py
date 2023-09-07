@@ -1,3 +1,6 @@
+#=================================================
+# Mapper class for AMBuildPart. 
+#=================================================
 import io
 import pandas
 import string
@@ -42,10 +45,13 @@ class Mapper(AMMapper):
         else:  
             print("Found:",t.PartID," ==> ",pid)
             amroot.pid=pid
-        # TBD whether it is ok to use the existing AMBuildPartas currently implemented, or should we always start from a new AMDoc, filling in data from excel.
-        #     problem is if the old doc contained things we do not want anymore because the schema no longer supports it, then starting from new is nicer as 
-        #     we might not know what we'd need to remove
-        #     OTHO might be nice to support a history of notes etc. So keep old notes, add to them with newer dates etc.
+        # TODO: TBD whether it is ok to use the existing AMBuildParts as currently implemented, 
+        # or should we always start from a new AMDoc, filling in data from excel.
+        # The problem is if the old doc contained things which do exist 
+        # because the schema no longer supports it, then starting from new is better as 
+        # we might not know what we'd need to remove
+        # OTOH it might be nice to support a history of notes etc. 
+        # May keep old notes, add to them with newer dates etc.
 
 
         part.location=str(t.Location)
@@ -69,8 +75,6 @@ class Mapper(AMMapper):
         identifier.id=maybe_string(t.PartID)
         identifier.type=AMMapper.DEFAULT_ID_TYPE
         part.identifier=[identifier]
-#             part.identifier=[t.PartID]
-#             part.identifier.type = AMMapper.DEFAULT_ID_TYPE
 
         owner = maybe_string(t.Owner)
         primaryContact = None
@@ -83,7 +87,7 @@ class Mapper(AMMapper):
                 part.primaryContact = primaryContact
             
         blobrefs=[]
-#         for t in df.itertuples():
+
         try:
             cell=getattr(t,self.IMAGE_COLUMN_CELLS)
             if cell in images:

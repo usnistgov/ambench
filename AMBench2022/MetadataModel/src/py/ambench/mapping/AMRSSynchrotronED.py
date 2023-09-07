@@ -115,7 +115,7 @@ class Mapper(AMMapper):
         
         identifier=amdoc.identifier()
         identifier.id=ID
-        identifier.type="Internal"
+        identifier.type=AMMapper.DEFAULT_ID_TYPE
         measurement.identifier=[identifier]
         
         primaryContact = amdoc.Person()
@@ -169,7 +169,7 @@ class Mapper(AMMapper):
             relMeas.relationship='Calibration'
             identifier=amdoc.identifier()
             identifier.id=t.Calibration_measurement_identier  # TODO check whether we can find PID for this
-            identifier.type="Internal"
+            identifier.type=AMMapper.DEFAULT_ID_TYPE #FIX
             relMeas.measurementIdentifier = identifier
             relatedMeasurements.append(relMeas)
             
@@ -180,7 +180,7 @@ class Mapper(AMMapper):
                 relMeas.relationship=rm.Relationship
                 identifier=amdoc.identifier()
                 identifier.id=rm.Related_measurement_identifier  # TODO check whether we can find PID for this
-                identifier.type="Internal"
+                identifier.type=AMMapper.DEFAULT_ID_TYPE #FIX
                 relMeas.measurementIdentifier = identifier
                 relatedMeasurements.append(relMeas)
         

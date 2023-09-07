@@ -1,3 +1,6 @@
+#=======================================================================
+# Python utility module used in mapping classes. 
+#=======================================================================
 import pandas
 import pyxb
 import string
@@ -81,8 +84,12 @@ def stringfy(s, na=None):
     else:
         return maybe_string(s, na)
 
-# u is units, un is uncertainty, and unType is uncertainty type
 def newPhysicalQuantity(v, u=None, un=None, unType="amount", na=None):
+    '''
+    u: units 
+    un: uncertainty
+    unType: uncertainty type
+    '''
     if v is None or maybe_string(v) == 'NA' or pandas.isnull(v):
         return None
     
@@ -136,7 +143,11 @@ def newRange(v, u=None):
         return None        
 
 def newField( k, v, na=None, desc=None, link=None):
-#     For keyword it's not allowed NA or None
+    '''
+    k: keyword
+    v: value
+    '''
+    # For keyword it's not allowed NA or None
     k = maybe_string(k)
     if k is None:
         print("ERROR: Cannot create Field since no Field name is given.")
@@ -179,7 +190,9 @@ def new_note(record,column,columns):
     note=amdoc.Note()
     note.text=c
     note.title=column
-    #note.date=pyxb.binding.datatypes.dateTime(datetime.datetime.now())
+    #note.date = None if no value
+    # Do not use set  to current date by default 
+    #since it sets to new date whenever generate xml file.
     
     return note
 
@@ -207,8 +220,18 @@ def createContributors(s):
     else:
         return None        
     
-#identifier, title, desc, type (file, folder, database), format, comment, urls, na values for urls    
 def newDigitalArtifact(url, urlna=None, iden=None, title=None, desc=None, typ=None, fm=None, comm=None):
+    '''
+    Create digital artifact.
+    iden: identifier 
+    title: title 
+    desc: description
+    type: digital artifact type. The allowed values are file, folder, database
+    fm: format
+    comm: comment text
+    url: urls
+    urlna: na values for urls
+    '''    
     try :
         url = maybe_string(url, urlna) 
         artifacts = []
@@ -260,28 +283,11 @@ def newDigitalArtifact(url, urlna=None, iden=None, title=None, desc=None, typ=No
         pass
         
     return artifacts
-
-def createDADataObject(k, v, na=None, desc=None, by=None, typ="file"):
-    k = maybe_string(k)
-    if k is None:
-        print("ERROR: Cannot create Data Object of Digital Artifact type since no field name is given.")
-        return None
     
-    v = maybe_string(v, na)
-    if v is not None:
-        o = amdoc.DataObject()
-        if desc is not None: 
-            obj.description = desc
-        if by is not None:
-            o.measuredBy = by
-        f = newField(k,newDigitalArtifact(typ=typ, url= v))    
-        o.field = [f]
-        return o
-    else:
-        return None
-
-# Add field to ObjectType     
 def add2ObjectType(objType, k, v, na=None, desc=None, link=None):
+    '''
+    Add field to ObjectType 
+    '''
     k = maybe_string(k)
     if k is None:
         print("ERROR: Cannot add to Object Type since no Field name is given.")
@@ -293,8 +299,10 @@ def add2ObjectType(objType, k, v, na=None, desc=None, link=None):
             objType.field.append(f) 
     return objType
 
-# Create dataObject and add it to DataSet
 def add2DataSet(ds, k, v, na=None, by=None, desc=None, link=None):
+    '''
+    Create dataObject and add it to DataSet
+    '''
     k = maybe_string(k)
     if k is None:
         print("ERROR: Cannot add to Object Type since no Field name is given.")
@@ -312,8 +320,11 @@ def add2DataSet(ds, k, v, na=None, by=None, desc=None, link=None):
                 ds.dataObject.append(o)
     return ds
 
-# Add dataObject to DataSet
 def addDO2DataSet(ds, do, by=None):
+    '''
+    # Add dataObject to DataSet
+    '''
+
     if do is not None:
         if by is not None and type(by) == amdoc.InstrumentRef:
             do.measuredBy = by
@@ -338,6 +349,9 @@ def createId(s, typ, na=None):
     return identifier
 
 def add2Ids(ids, s, typ, na=None):
+    '''
+    Create id from whose value is <s> and its type <typ> and add it to existing ids.
+    '''
     try:
         id_ = createId(s, typ, na)
         if id_ is not None:
@@ -348,7 +362,7 @@ def add2Ids(ids, s, typ, na=None):
 
 def pil2bytes(pilimage):
     '''
-    retriev PIL image as a byte array
+    Retrieve PIL image as a byte array
     '''
     buf = io.BytesIO()
     pilimage.save(buf)

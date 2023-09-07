@@ -1,3 +1,7 @@
+#=================================================
+# Mapper class for AMThermography 
+#=================================================
+
 import io
 import pandas
 import string
@@ -25,6 +29,16 @@ class Mapper(AMMeasurementMapper):
         return self.do_map(outfolder,Mapper.SHEET,verbose)
         
     def map_fromtable_toxml(self,i, df, anno_df, docu_df, outfolder,columns, pids, images):
+        '''
+        df: metadata data frame for a single measurement of a single measurement type.
+        anno_df: column description data frame defined in the measurement Excel spreadsheet.
+        docu_t: metadata data frame describing the measurement type of the metadata given in df. 
+        outfolder: local folder where a resultant XML file is written.
+        columns: list of column names defined in the sheet 
+        pids: All PIDS existing in a CDCS database.
+        images: All images existing in a CDCS database.
+        '''
+        
         amroot = amdoc.AMDoc()
         measurement = amdoc.MechanicalTestingMeasurement()
         try:
@@ -34,8 +48,6 @@ class Mapper(AMMeasurementMapper):
             ID = identifier.id
             pid = self.find_pid4id(ID)
             is_new=False
-#             amroot=amdoc.AMDoc()
-#             measurement=amdoc.MechanicalTestingMeasurement()
             amroot.AMMechanicalTesting=measurement
             if pid is None:
                 amroot.pid=""
@@ -119,7 +131,6 @@ class Mapper(AMMeasurementMapper):
 
         isNewDS, ds = self.getDataSet(out, 'Processed Data')
         add2DataSet(ds,k="Processed_Engineering_Stress_Strain", v=newDigitalArtifact(typ="file", url= t.Processed_Engineering_Stress_Strain), na='NA', desc=an.Processed_Engineering_Stress_Strain)
-#         add2DataSet(ds,k="Uncertainty_analysis", v=newDigitalArtifact(typ="file", url= t.Uncertainty_analysis), na='NA')
         if isNewDS == True:
             out.dataSet.append(ds)
 

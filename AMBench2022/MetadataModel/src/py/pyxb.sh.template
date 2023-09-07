@@ -1,13 +1,27 @@
 # This shell script generates Python classes ('amdoc.py') which correspond 
-# to data structures defined in 'AMDocs.xsd' using Python package PyXB(https://pypi.org/project/PyXB/)
+# to data structures defined in 'AMDocs.xsd' using Python package PyXB (https://pypi.org/project/PyXB/).
 #
 # Need to install install Python package PyXB before running this script(see requirements.txt)
 #
-# Before running this script, replace [USERNAME] and [REPOSITORY] where [USERNAME] and [REPOSITORY] 
-# are your SciServer user name and the name of a folder where the AM Bench GitHub repository 
-# has been cloned, respectively.
-#
+
+# SOURCE_FOLDER=path to input schema file AMDocs.xsd
+# TARGET_FOLDER=path to output Python class file
+##
+##
+##
+##
 ~/miniconda3/envs/py38/bin/pyxbgen\
-        -m amdoc -u /home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/Model/XSD/AMDocs.xsd\
-        --binding-root /home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/src/py/ambench
- 
+        -m amdoc -u SOURCE_FOLDER/AMDocs.xsd --binding-root TARGET_FOLDER 
+#        
+# 
+# For example, if you are running this script in SciServer Compute container 
+# 
+# Before running this script, 
+# SOURCE_FOLDER=/home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/Model/XSD/AMDocs.xsd
+# TARGET_FOLDER=/home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/src/py/ambench
+# where [USERNAME] and [REPOSITORY] are your SciServer user name and the folder name 
+# where the AM Bench GitHub repository has been cloned, respectively.
+##
+##~/miniconda3/envs/py38/bin/pyxbgen\
+##        -m amdoc -u /home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/Model/XSD/AMDocs.xsd\
+##        --binding-root /home/idies/workspace/Storage/[USERNAME]/persistent/GIT/[REPOSITORY]/AMBench2022/MetadataModel/src/py/ambench

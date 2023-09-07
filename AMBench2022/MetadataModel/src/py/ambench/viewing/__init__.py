@@ -4,7 +4,10 @@ import ambench.viewing.AMBuildPart
 # import ambench.viewing.AMPowder
 import ambench.viewing.Material
 # import ambench.viewing.AMRSSynchrotronED
-# import ambench.viewing.AMMechanicalTesting
+import ambench.viewing.AMMechanicalTesting
+
+
+KNOWN_AMDOCS=sorted(['AMBuildPlate','AMBuildPart','Material','AMBSpecimen', 'AMMechanicalTesting'])
 
 def new_viewer(ambviewer, DOC_TYPE):
     if DOC_TYPE == 'AMBuildPlate':
@@ -19,7 +22,7 @@ def new_viewer(ambviewer, DOC_TYPE):
 #         return ambench.viewing.AMPowder.Viewer(ambviewer)
 #     elif DOC_TYPE == 'AMRSSynchrotronED':
 #         return ambench.viewing.AMRSSynchrotronED.Viewer(ambviewer)
-#     elif DOC_TYPE == 'AMMechanicalTesting':
-#         return ambench.viewing.AMMechanicalTesting.Viewer(ambviewer)
+    elif DOC_TYPE == 'AMMechanicalTesting':
+        return ambench.viewing.AMMechanicalTesting.Viewer(ambviewer)
     else:
         raise Exception("No viewer class known for doc type",DOC_TYPE)

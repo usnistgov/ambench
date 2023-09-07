@@ -1,3 +1,7 @@
+#=================================================
+# Mapper class for Material. 
+#=================================================
+
 import io
 import pandas
 import string
@@ -23,17 +27,6 @@ class Mapper(AMMapper):
         '''
         t is a tuple from DataFrame.itertuples()
         '''
-#         MQ=({"AMDoc.Material.name": t.MaterialID})
-#         amroot=self.ambench2022.mongo_query(MQ)
-#         if amroot is None or len(amroot) == 0:
-#             amroot=amdoc.AMDoc()
-#             amroot.pid=""
-#             material=amdoc.Material()
-#             amroot.Material=material
-#             is_new=True
-#         else:
-#             material = amroot.Material
-#             is_new=False
         pid = self.find_pid4id(t.MaterialID)
         is_new=False
         amroot=amdoc.AMDoc()
@@ -47,9 +40,6 @@ class Mapper(AMMapper):
             print("Found:",t.MaterialID," ==> ",pid,"update doc from excel")
             amroot.pid=pid
 
-        # set all values based on spread sheet, i.e. do not do a comparison, 
-        # simply overwrite all in case the doc already existed. 
-        # only pid is not overwritten
         material.name=t.MaterialID
         material.description=maybe_string(t.Description)
         material.creationDate = maybe_date(t.Approximate_acquisition_date)

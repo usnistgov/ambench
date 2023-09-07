@@ -1,3 +1,9 @@
+#================================================================
+#This module contains base class for creating XML document from 
+#metadata describing AM Bench resources. The resource include 
+#samples, build process and measurements. These metadata are entered 
+#by the responsible scientists and are stored in Excel spreadsheet.
+##================================================================
 import io
 import pandas
 import string
@@ -19,7 +25,7 @@ class AMMapper():
     DEFAULT_ID_TYPE = 'Internal identifier'
     def __init__(self,ambench2022, DOC_TYPE, CONFIG):
         """
-        CONFIG contains pointers to excel files that mapper may need
+        CONFIG contains pointers to excel files that contain the input metadata.  
         """
         self.ambench2022=ambench2022
         self.CONFIG=CONFIG
@@ -56,9 +62,10 @@ class AMMapper():
         df.columns = new_header
         return df
         
-
-    #Get materialInfo from AMPowder or Material.
     def get_materialInfo(self,name, source):
+        '''
+        Get materialInfo from source which is AMPowder or Material document type
+        '''
         if source == "AMPowder" or source == "Material":
             MQ=({f'AMDoc.{source}.name':name})
         else:
@@ -80,6 +87,9 @@ class AMMapper():
             return None
         
     def get_materialInfo_from_pid(self,pid):
+        '''
+        Get materialInfo from document for given pid
+        '''
         _xml = maybe_string(self.ambench2022.query_doc_by_pid(pid)['xml_content'])
         if _xml is not None:  
             root=etree.fromstring(_xml.encode('utf-8'))
@@ -97,60 +107,26 @@ class AMMapper():
         else:
             return None        
 
-    def get_existing(self):
-        MQ=({f"AMDoc.{DOC_TYPE}": {"$exists": True}})
-        return ambench2022.mongo_query(MQ)
-    
-    def detectAndCheckImages(self,EXCEL_FILE,SHEET,image_column):
-        '''
-        checks whether there are images in the sheet at the specified column
-        if so checks whether the image already exists . returns handle if so, None if not
-        returns dict of cell:(checksum,handle)
-        '''
-        sheets=self.read_excel(EXCEL_FILE)
-        sheet=sheets[self.SHEET]
-        pyxl_doc = openpyxl.load_workbook(EXCEL_FILE)
-        pyxl_sheet = pyxl_doc[self.SHEET]
-        images=self.retrieveImages(pyxl_sheet)
-
-        header=self.col_header(sheet,image_column)
-        all_images=self.ambench2022.query_amblob_refs()
-        cells={}
-        for i,row in sheet.iterrows():
-            # cell possibly containing image for the current row
-            cell=f'{header}{i+2}'
-            try:
-                if cell not in images:
-                    continue
-                image=images[cell]
-                checksum=checksum4image(image)
-                if checksum in all_images:
-                    handle=all_images[checksum]
-                else:
-                    handle = None
-                cells[cell]=(checksum,handle,image)
-            except Exception as e:
-                raise e
-        return cells
-    
     def col_header(self,df,colname):
         '''
-        create mapping between pandas columns and openpyxl column headers
-        for working with openpyxl, need to have the excel sheet headers, not the pandas column names. 
-        here a list is created from [A-Z]+[AA-ZZ] and this is mapped to the column headers in pandas data frame
+        Create mapping between pandas columns and openpyxl column headers
+        in order to work with openpyxl which need to have the excel sheet headers, 
+        not the pandas column names. 
+        In this function a list is created from [A-Z]+[AA-ZZ] and 
+        this is mapped to the column headers in pandas data frame.
         '''
         colsmap={a[0]:a[1] for a in zip(df.columns,self.excel_header)}
         return colsmap[colname]
 
     def retrieveImages(self,pyxl_sheet):
         '''
-        find all images in the specified openpyxl sheet
-        returns dict of cell:image
+        Find all images in the specified openpyxl sheet
+        Returns dict of cell:image
         '''
         images={}
-        # cannot use SheetImageLoader as that only works with columns A-Z, not AA etc
-        # see https://github.com/ultr4nerd/openpyxl-image-loader/issues/3
-        # hence using pyxl_sheet._images
+        # Cannot use SheetImageLoader as that only works with columns A-Z, not AA etc.
+        # See https://github.com/ultr4nerd/openpyxl-image-loader/issues/3
+        # Hence using pyxl_sheet._images
         for _image in pyxl_sheet._images:
             image = io.BytesIO(_image._data())
             image = Image.open(image)
@@ -161,17 +137,23 @@ class AMMapper():
     
     def retrieveAndLoadImages(self,pandas_sheet,pyxl_sheet,image_column, image_cell_column):
         '''
-        retrieve images from column <image_column> in an excel sheet represented as a pandas_sheet (DataFrame0 and an openpyxl sheet (for retrieving the images).
-        for each image calculate its checksum and check whether it already exists using a list of AMBlob objects loaded in CDCS already
-        if not exists load image as a BLOB into CDCS and create an AMBlob XML doc representing this BLOB with its checksum and handle
-        return dict of {cell-label:AMBlobRef} wehere the cell-label gives the "native" excel column/row indicater (e.g. S22) 
-        for the columns known in pandas by name and an index
-        side effect: a column named <image_cell_column>is added to the pandas_sheet that stores the cell-label for the image column.
+        Retrieve images from column specified in 'image_column' in an excel sheet represented 
+        as a pandas_sheet of dataFrame and an openpyxl sheet for retrieving the images.
+        For each image calculate its checksum and check whether it already exists using 
+        a list of AMBlob objects loaded in CDCS already. If it does not exist load image 
+        as a BLOB into CDCS and create an AMBlob XML document representing this BLOB with
+        its checksum and handle and return dict of {cell-label:AMBlobRef} 
+        where the cell-label gives the "native" excel column/row indicator (e.g. S22) 
+        for the columns known in pandas by name and an index.
+        
+        Side effect: a column named 'image_cell_column' is added to the pandas_sheet that
+        stores the cell-label for the image column.
         See how this is used for example in the mapping code of AMSpecimen.
         
         image_column is the actual column that may contain an image.
-        image_cell_column is the name of a new column that is added to the input pandas_sheet and will contain key of the 
-            dict returned from this function that may hold the AMBlobReference for the stored image.
+        image_cell_column is the name of a new column that is added to the input pandas_sheet 
+        and will contain key of the dict returned from this function that may hold
+        the AMBlobReference for the stored image.
         '''
         images=self.retrieveImages(pyxl_sheet)
         
@@ -209,8 +191,9 @@ class AMMapper():
         return blobRefs
     
     def initPossibleContributors(self):
-        # reads sheets with contributors
-        # creates a dict of Person-s keyed by name
+        '''
+        Reads excel sheet with contributors and creates a dict of Person-s keyed by name.
+        '''
         self.possible_contributors_email={}  # keyed by email
         self.possible_contributors_orcid={}  # keyed by email
         sheets=self.read_excel(self.CONFIG.CONTRIBUTORS_EXCEL_FILE)
@@ -230,7 +213,10 @@ class AMMapper():
                 self.possible_contributors_orcid[p.orcidID]=p
 
     def findContributors(self,contributors,role=None):
-        # with input a comma-separated-list of emails and/or orcids, find the contributors
+        '''
+         Find the contributors for given contributors.
+         Input 'contributors' is a comma-separated-list of emails and/or orcids. 
+         '''
         contributors = maybe_string(contributors)
         if contributors is None:
             return None

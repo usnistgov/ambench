@@ -1,3 +1,10 @@
+#================================================================
+#This module contains functions commonly used in mapping codes which
+#translates the metadata stored in Excel spreadsheet 
+#for AM Bench measurements to XML documents.
+#The modules for mapping specific measurement types 
+#are inherited from AMMeasurementMapper class. 
+#================================================================
 import io
 import pandas
 import string
@@ -14,7 +21,14 @@ import time
 import traceback
 import sys
 
+####################
+# CLASS DEFINITIONS
+###################
 class AMMeasurementMapper(AMMapper):
+    '''
+    Base class for translating AM Bench measurement metadata to XML documents.
+    It inherits from AMMapper.  
+    '''
     DOCUMENTATION_SHEET = 'DOCUMENTATION'
     IMAGE_COLUMN='Specimen_measurement_geometry_diagrams_and_photos'
     IMAGE_COLUMN_CELLS=IMAGE_COLUMN+"__cells"
@@ -22,13 +36,37 @@ class AMMeasurementMapper(AMMapper):
     SEPCIMEN_CONDITIONS = ['starting material','build process','as built','as-built', 'homogenized','fully heat treated',
                            'from as built to homogenized','from homogenized to fully heat treated']
     MEASUREMENT_DIRECTIONS = ['X','Y','Z','XY','XZ','YZ','XYZ']
+    
     def __init__(self,ambench2022, DOC_TYPE, CONFIG):
         super().__init__(ambench2022, DOC_TYPE, CONFIG)
         
-    def map_fromtable_toxml(self,i, df, anno_df, docu_t, outfolder,columns, pids, images): 
+    def map_fromtable_toxml(self,i, df, anno_df, docu_t, outfolder,columns, pids, images):
+        '''
+        Abstract method for mapping a set of metadata per measurement identifier 
+        from pandas data frame to an XML document. Specific implementation for each 
+        measurement type is defined in its own Python module.  
+        
+        df: metadata data frame for a single measurement of a single measurement type.
+        anno_df: column description data frame defined in the measurement Excel spreadsheet.
+        docu_t: metadata data frame describing the measurement type of the metadata given in df. 
+        outfolder: local folder where a resultant XML file is written.
+        columns: list of column names defined in the sheet 
+        pids: All PIDS existing in a CDCS database.
+        images: All images existing in a CDCS database.
+        '''
         return
 
     def do_map(self, outfolder,sheet_name,verbose=False):
+        '''
+        Upload an Excel spreadsheet, PIDs, and images in memory and 
+        call map_fromtable_toxml method to generate an XML file for each measurement 
+        read from the spreadsheet.
+        
+        outfolder: local folder where resultant XML files are written.
+        sheet_name: the name of Excel spreadsheet where measurement metadata are stored.
+        
+        returns a dict of XML file and flag indicating whether XML file is new or not.
+        '''
         EXCEL_FILE=self.CONFIG.MEAS_EXCEL_FILE
         CONTRIBUTORS_EXCEL_FILE=self.CONFIG.CONTRIBUTORS_EXCEL_FILE
         t0=time.time()
@@ -38,9 +76,10 @@ class AMMeasurementMapper(AMMapper):
         pyxl_doc = openpyxl.load_workbook(EXCEL_FILE)
         pyxl_sheet = pyxl_doc[sheet_name]
         
-        # check whether images exist for any of the processing steps for these specimens and load those
+        # check whether images exist for any of specimen measurement geometry and load those
         # returned a dict checksum:handle of all loaded blobs
-        # first retrieve images, then throw uhman_readonly columns. otherwise the matching between cells wiht images goes awry
+        # first retrieve images, and upload Huhman_readonly columns in data frame. 
+        # otherwise the matching between cells with images goes awry
         
         if AMMeasurementMapper.IMAGE_COLUMN not in sheet.columns:
             sheet[AMMeasurementMapper.IMAGE_COLUMN]=''        
@@ -74,7 +113,10 @@ class AMMeasurementMapper(AMMapper):
         return docs      
     
     def fillTemplateMeasurement(self, measurement, identifier, df, docu_df, columns, pids, images, dateTimeFormat = DEFAULT_DATETIME_FORMAT):
-#         Measurement General overview Mapping
+        '''
+        Map metatdata common to all measurement types for given identifier.
+        '''
+    
         t = df.iloc[0]
         docu_t = docu_df.iloc[0]
         ID = identifier.id
@@ -99,8 +141,6 @@ class AMMeasurementMapper(AMMapper):
             measurement.primaryContact = primaryContact
             
         measurement.contributor  = self.findContributors(contributors=t.Contributors)
-#         if contributors is not None and len(contributors) > 0:
-#             measurement.contributor = contributors
         measurement.facility = maybe_string(t.Measurement_facility, na='NA')
         desc = maybe_string(t.Measurement_description, na='NA')
         if desc is not None :
@@ -130,8 +170,6 @@ class AMMeasurementMapper(AMMapper):
                 measurement.startDate = aDate
         if maybe_string(t.Measurement_end_date_time, na='NA') is not None:
             measurement.completeDate = readDateTime(t.Measurement_end_date_time, dateTimeFormat)
-#             if aDate is not None:
-#                 measurement.completeDate = aDate
         try:    
             rms = self.createRelatedMeasurement(df)
             if rms is not None and len(rms) > 0:
@@ -139,12 +177,12 @@ class AMMeasurementMapper(AMMapper):
         except:
             print(traceback.format_exc(), file=sys.stderr, flush=True)
                 
-#       Measurements general notes
+        # Create general measurements notes
         notes=self.createMeasurementNotes(df[['Note_number', 'Note_title', 'Note_date', 'Note']])
         if notes is not None and len(notes) > 0:
             measurement.note = notes        
             
-#       Measurement method mapping         
+        # Create measurement method         
         measurement.measurementMethod = amdoc.MeasurementMethod()        
         insConfig = self.createInstrumentConfiguration(amdoc.InstrumentConfiguration(), df, columns)
         if insConfig is not None:
@@ -161,7 +199,9 @@ class AMMeasurementMapper(AMMapper):
         mi.buildProcessInSitu = maybe_string(docu_t.Build_process_in_situ)
         mi.postBuildProcessInSitu = maybe_string(docu_t.Post_build_process_in_situ)    
         measurement.measurementInfo = mi
-#         Specimen mapping: add specimen only if PID exists.
+        
+        # Create specimen whose XSD type is MeasurementInput: 
+        # Add specimen only if its PID exists in <pids>
         specimenID = maybe_string(t.Specimen_ID, na='NA')
         
         if  specimenID is not None:
@@ -221,7 +261,9 @@ class AMMeasurementMapper(AMMapper):
                 pass
         else:
             print("WARNING: specimen ID is None or NA.")
-
+            
+            
+        # Create results
         datasets = []
         ds = amdoc.DataSet()
         ds.type = 'Raw Data'
@@ -400,7 +442,7 @@ class AMMeasurementMapper(AMMapper):
         return isNew, ds
 
     def createRelatedMeasurement(self, df):
-        # relatedMeasurements: calibration
+        # Create relatedMeasurements whose type is calibration
         t = df.iloc[0]
         rms = []
         if t.Calibration_Y_or_N == 'N':
@@ -421,7 +463,7 @@ class AMMeasurementMapper(AMMapper):
                 if (mid is not None or mdata is not None or mdesc is not None):
                     self.createCalibration(addSuffix=False, _type ="Calibration", _id=mid, data=mdata, desc=mdesc, rms=rms)
 
-        # relatedMeasurements: other than calibration
+        # Create relatedMeasurements excluding calibration
         for r in df.itertuples():
             mid = createId(r.Related_measurement_identifier, AMMapper.DEFAULT_ID_TYPE, na='NA')
             mtype = maybe_string(r.Related_measurement_type, na='NA')

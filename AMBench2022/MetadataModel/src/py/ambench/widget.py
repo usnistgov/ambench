@@ -15,7 +15,7 @@ import SciServer.CasJobs as cj
 
 # widget
 class AMBViewer():
-    KNOWN_AMDOCS=sorted(['AMBuildPlate','AMBuildPart','Material','AMBSpecimen'])
+#     KNOWN_AMDOCS=sorted(['AMBuildPlate','AMBuildPart','Material','AMBSpecimen','AMPowder'])
     
     css_str = '<style>.foo{color:#F00;} )} </style>'
     
@@ -25,7 +25,7 @@ class AMBViewer():
     selections_layout=Layout(height='100%',width="20%",display="flex")
     overall_layout=Layout(height='1000px',width='100%')
     
-    def __init__(self, ambench2022,AUTH=None,useCDCS=True,TABLE='AMDocs_v23',DATABASE="AMBench"):
+    def __init__(self, ambench2022,AUTH=None,useCDCS=True,TABLE='AMDocs',DATABASE="AMBench"):
         self.ambench2022=ambench2022
         self.AUTH=AUTH
         self.useCDCS=useCDCS
@@ -41,7 +41,7 @@ class AMBViewer():
         self.nextButton.on_click(self.next)
         
     def init_docs(self):
-        alldocs="','".join(AMBViewer.KNOWN_AMDOCS)
+        alldocs="','".join(viewing.KNOWN_AMDOCS)
         doctypes=f"('{alldocs}')"
         sql=f"""
         select * from {self.table} where doctype in {doctypes}
@@ -102,6 +102,8 @@ class AMBViewer():
         
         def dd_on_change(change):
             if change['type'] == 'change' and change['name'] == 'value':
+                sel.options=[]
+                output.clear_output()
                 self.log_box.value += "dd change to "+change['new']  +"\n"  
                 self.currentDocType=change['new']
                 sel.options=sorted(self.currentGroup()['title'])
@@ -110,6 +112,8 @@ class AMBViewer():
         dd.observe(dd_on_change)
 
         def select(ix):
+            if not(isinstance(ix, int)):
+                return
             with output:   # TBD is this with necessary? why?
                 output.clear_output()
                 t = self.currentDoc(ix)
@@ -126,7 +130,7 @@ class AMBViewer():
                 
         sel.observe(sel_on_change)
         
-        dd.options=AMBViewer.KNOWN_AMDOCS
+        dd.options=viewing.KNOWN_AMDOCS
         
         hb1=HBox([dd,self.previousButton,self.nextButton])
         return widgets.VBox([hb1,HBox([sel, output], layout=AMBViewer.overall_layout),self.log_box])

@@ -1,3 +1,7 @@
+#=================================================
+# Mapper class for AMThermography 
+#=================================================
+
 import io
 import pandas
 import string
@@ -23,6 +27,15 @@ class Mapper(AMMeasurementMapper):
         return self.do_map(outfolder,Mapper.SHEET,verbose)
         
     def map_fromtable_toxml(self,i, df, anno_df, docu_df, outfolder,columns, pids, images):
+        '''
+        df: metadata data frame for a single measurement of a single measurement type.
+        anno_df: column description data frame defined in the measurement Excel spreadsheet.
+        docu_t: metadata data frame describing the measurement type of the metadata given in df. 
+        outfolder: local folder where a resultant XML file is written.
+        columns: list of column names defined in the sheet 
+        pids: All PIDS existing in a CDCS database.
+        images: All images existing in a CDCS database.
+        '''
 
         t = df.iloc[0]
         an = anno_df.iloc[1] #Annotation        

@@ -1,3 +1,6 @@
+#=======================================================================
+# Mapper class for AMBSpecimen. 
+#=======================================================================
 import io
 import pandas
 import string
@@ -25,9 +28,10 @@ class Mapper(AMMapper):
 
     
     def map_from_excel(self,outfolder,verbose=False):
-        '''
-        This method seems quite generic and can be defined maybe higher in super class hierarchy
-        '''
+        #
+        #TODO: This method seems quite generic and may be moved 
+        #to its super class in hierarchy
+        #
         EXCEL_FILE=self.CONFIG.SAMPLES_EXCEL_FILE
         
         sheets=self.read_excel(EXCEL_FILE)
@@ -35,8 +39,8 @@ class Mapper(AMMapper):
         pxl_doc = openpyxl.load_workbook(EXCEL_FILE)
         _sheet = pxl_doc[self.SHEET]
         
-        # check whether images exist for any of the processing steps for these specimens and load those
-        # returned a dict cellname:AMBlobReference of all loaded blobs
+        # check whether images exist for any of the processing steps 
+        # for these specimens and load those
         images = self.retrieveAndLoadImages(sheet,_sheet,self.IMAGE_COLUMN,self.IMAGE_COLUMN_CELLS)
         
         docs={}
@@ -54,8 +58,9 @@ class Mapper(AMMapper):
 
     def map_doc_group(self,doc_id,df,images,outfolder,verbose=False):
         '''
-        map the data for a given specimen, identified by doc_id and represented by pandas data frame df.
-        images may be filled with AMBlobReference-s, keyed by cell label.
+        Map the data for a given specimen, identified by 
+        doc_id and represented by pandas data frame df.
+        Images may be filled with AMBlobReference-s, keyed by cell label.
         '''
         t=df.iloc[0] # simple data should be written in the first row only
         tuple_id= getattr(t,self.ID_COLUMN) # MUST be same as doc_id
@@ -79,7 +84,6 @@ class Mapper(AMMapper):
             if verbose:
                 print("Did not find:",doc_id)
 
-        # pretty common
         spec.name=doc_id
         spec.description=maybe_string(t.Description)
         
@@ -110,9 +114,8 @@ class Mapper(AMMapper):
             spec.parent=parent
         
         spec.status=maybe_string(t.Current_condition)
-        # TBD some combination of description,purpose,comments,specification?
-        spec.purpose=maybe_string(t.Measurement_Requirements)  # WRONG?
-#         spec.identifier=[doc_id]
+        # TODO: TBD some combination of description,purpose,comments,specification
+        spec.purpose=maybe_string(t.Measurement_Requirements)  
 
         identifier=amdoc.identifier()
         identifier.id=doc_id
@@ -129,9 +132,8 @@ class Mapper(AMMapper):
             if primaryContact is not None:
                 spec.primaryContact = primaryContact
             
-        #------------------------------------------------------------------------------
-        # Notes:
-        # TBD mapping also measurement_requirements and _method. Should we ignore those?
+        # TODO: TBD whether to include measurement_requirements and
+        # measurement_method in notes or not.
         notes=[]
         for note_column in ['Comments','Measurement_Requirements','Measurement_method']:
             note=new_note(t,note_column,df.columns)
@@ -145,9 +147,7 @@ class Mapper(AMMapper):
         if t.Processing_Step_ID is not None:
             spec.processingSteps=self.retrieveProcessingSteps(doc_id,df.groupby('Processing_Step_ID'),images)
         #------------------------------------------------------------------------------
-
-# TODO do we do something with Design_diagrams_and_photos Design_diagram_label or is that all included in the processing steps now?
-#             spec.partLabel=maybe_string(t.Design_diagram_label)
+        # TODO: Add Design_diagrams_and_photos Design_diagram_label 
 
         xmlfile=f"{outfolder}/{doc_id}.xml"  # ensure doc_id is a valid filename!
         try:
@@ -161,7 +161,7 @@ class Mapper(AMMapper):
 
     def retrieveProcessingSteps(self, specimenId, stepsgroup,images):
         '''
-        retrieve and transform the processing steps for a specimen
+        Retrieve and transform the processing steps for a specimen
         '''
         if len(stepsgroup)==0:
             return None
@@ -180,7 +180,8 @@ class Mapper(AMMapper):
                 
             poc=maybe_string(t.Processing_POC)
             primaryContact = None
-            if poc is not None and len(poc)>0: # TODO lookup more info on person from the Contributors excel sheet
+            # TODO lookup more info on person from the Contributors
+            if poc is not None and len(poc)>0:  
                 if '@' in poc:
                     primaryContact = self.possible_contributors_email.get(poc.lower())
                 elif '-' in poc:

@@ -1,3 +1,6 @@
+#=================================================
+# Mapper class for AMBuildPlate. 
+#=================================================
 import io
 import pandas
 import string
@@ -29,7 +32,7 @@ class Mapper(AMMapper):
         
     def part_definitions(self, plate_id):
         '''
-        retrieve part definitions for a plate
+        Retrieve part definitions for a plate
         '''
         rows=self.BUILDPARTS.loc[self.BUILDPARTS['BuildPlateID'] == plate_id]
         pds=[]
@@ -51,8 +54,7 @@ class Mapper(AMMapper):
         '''
         t is a tuple from DataFrame.itertuples()
         '''
-        # ensure the root has no prefix, important for CDCD recognizing a pid must be added.
-    #     pyxb.utils.domutils.BindingDOMSupport.SetDefaultNamespace(None)
+        # ensure the root has no prefix.
 
         pid = self.find_pid4id(t.BuildPlateID)
         is_new=False
@@ -107,7 +109,6 @@ class Mapper(AMMapper):
                 plate.primaryContact = primaryContact
        
         blobrefs=[]
-#         for t in df.itertuples():
         try:
             cell=getattr(t,self.IMAGE_COLUMN_CELLS)
             if cell in images:
@@ -135,8 +136,8 @@ class Mapper(AMMapper):
         pxl_doc = openpyxl.load_workbook(self.CONFIG.SAMPLES_EXCEL_FILE)
         _sheet = pxl_doc['Build plates']
        
-        # check whether images exist for any of the processing steps for these specimens and load those
-        # returned a dict cellname:AMBlobReference of all loaded blobs
+        # check whether images exist for any of the processing steps for these build plates 
+        #and load those
         images = self.retrieveAndLoadImages(sheet,_sheet,self.IMAGE_COLUMN,self.IMAGE_COLUMN_CELLS)
             
         buildplates={}

@@ -1,3 +1,7 @@
+#=================================================
+# Mapper class for AMComposition. 
+#=================================================
+
 import io
 import pandas
 import string
@@ -24,7 +28,16 @@ class Mapper(AMMeasurementMapper):
     def map_from_excel(self, outfolder,verbose=False):
         return self.do_map(outfolder,Mapper.SHEET,verbose)
         
-    def map_fromtable_toxml(self,i, df, anno_df, docu_df, outfolder,columns, pids, images):        
+    def map_fromtable_toxml(self,i, df, anno_df, docu_df, outfolder,columns, pids, images):
+        '''
+        df: metadata data frame for a single measurement of a single measurement type.
+        anno_df: column description data frame defined in the measurement Excel spreadsheet.
+        docu_t: metadata data frame describing the measurement type of the metadata given in df. 
+        outfolder: local folder where a resultant XML file is written.
+        columns: list of column names defined in the sheet 
+        pids: All PIDS existing in a CDCS database.
+        images: All images existing in a CDCS database.
+        '''
 
         t = df.iloc[0]
         an = anno_df.iloc[1] #Annotation
@@ -43,14 +56,14 @@ class Mapper(AMMeasurementMapper):
             print("Found:",ID," ==> ",pid,"update doc from excel")
             amroot.pid=pid
 
-#########################################        
+       
         try:
             measurement = self.fillTemplateMeasurement(measurement,identifier,df,docu_df, columns,pids,images,'%Y-%m-%d %H:%M:%S')
         except:
             print(traceback.format_exc(), file=sys.stderr, flush=True)  
 
     
-#   No Custom Specimen Metadata so far
+#   No Custom Specimen Metadata found in Composition Excel spreadsheet
 #         try:
 #             if measurement.specimen is None:
 #                 specimen = amdoc.MeasurementInput()
@@ -64,25 +77,20 @@ class Mapper(AMMeasurementMapper):
 #             print(traceback.format_exc(), file=sys.stderr, flush=True)      
 #             pass
 
-#    Custom Data objects
+        #    Custom Data objects
         try:
             out = amdoc.CompositionResult()
             out.testReport = newDigitalArtifact(typ="file", url= t.Test_report, iden=t.Test_report_nr, urlna='NA')
             elts = []
             
-#             
             for index, r in df.iterrows():
                 elt = amdoc.ConstituentMaterial() 
                 elt.element = maybe_string(r['Element_symbol'])
-                # u is units, un is uncertainty, and unType is uncertainty type
-#def newPhysicalQuantity(v, u=None, un=None, unType="amount", na=None):
 
                 fr = maybe_string(r['Fraction'])
                 if elt.element is not None and fr is not None:       
                     qn = ''.join(c for c in fr if c not in '<')
                 
-#                     elt.quantity=pyxb.binding.datatypes.double(qn)
-#                     elt.unit = maybe_string(r['Units'])
                     elt.quantity = newPhysicalQuantity(qn, u=maybe_string(r['Units']))
                     if len(qn) != len(fr):
                         elt.isUpperBound = True
@@ -95,7 +103,6 @@ class Mapper(AMMeasurementMapper):
             constituents = amdoc.Constituents()
             constituents.constituent = elts
             composition = amdoc.Composition()    
-#             composition.quantityUnit = maybe_string(t.Units)
             composition.Constituents = constituents
             out.composition = composition
             measurement.results = out

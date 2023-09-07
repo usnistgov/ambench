@@ -1,3 +1,6 @@
+#=================================================
+# Mapper class for AMPowder. 
+#=================================================
 import io
 import pandas
 import string
@@ -16,7 +19,7 @@ class Mapper(AMMapper):
     
     DOC_TYPE='AMPowder'
     SHEET='Powders'
-#     SIZE_COLUMNS=['Diameter_quantile','Diameter','Diameter_unit']
+
     def __init__(self, ambench2022, CONFIG):
         super().__init__(ambench2022,Mapper.DOC_TYPE, CONFIG)
         
@@ -37,9 +40,6 @@ class Mapper(AMMapper):
             print("Found:",t.LotNumber," ==> ",pid,"update doc from excel")
             amroot.pid=pid
 
-        # set all values based on spread sheet, i.e. do not do a comparison, 
-        # simply overwrite all in case the doc already existed. 
-        # only pid is not overwritten
         powder.lotNumber=t.LotNumber
         powder.name=t.LotNumber
         powder.supplier=maybe_string(t.Supplier)
@@ -47,35 +47,14 @@ class Mapper(AMMapper):
         materialInfo=amdoc.MaterialInfo()
         materialInfo.materialClass=t.Type
         powder.materialInfo=materialInfo
-#         powder.alloyPowderType=t.Type
         powder.atomizationType=t.Atomization
         powder.usageType=t.Condition
-
-    #     notes=[]
-    #     notes.append(new_note(t,'Status',columns))
-    #     powder.note=notes
 
         identifier=amdoc.identifier()
         identifier.id=t.LotNumber
         identifier.type=AMMapper.DEFAULT_ID_TYPE
         powder.identifier=[identifier]
 
-                
-#         if sizes is not None:
-#             sizes=sizes.replace('', np.nan, inplace=False)
-#             sizes.dropna(how='all',inplace=True)
-#             if len(sizes)>0:
-#                 distr=amdoc.PowderSizeDistribution()
-#                 powderSizes=[]
-#                 for size in sizes.itertuples():
-#                     powderSize=amdoc.PowderSize()
-#                     powderSize.diameterQuantile=size.Diameter_quantile
-#                     powderSize.diameter=size.Diameter
-#                     powderSize.diameterUnit=size.Diameter_unit
-#                     powderSizes.append(powderSize)
-#                 distr.powderSize=powderSizes
-#                 powder.nominalPowderSizeDistribution=distr
-                
         xmlfile=f"{outfolder}/{t.LotNumber}.xml"
         with open(xmlfile,"w") as f:
             f.write(prettify(amroot.toxml("utf-8").decode('utf-8')))
@@ -93,7 +72,6 @@ class Mapper(AMMapper):
                 continue
             try:
                 t=df.iloc[0]
-#                 sizes=df[Mapper.SIZE_COLUMNS]
                 xmlfile,is_new=self.powder_toxml(t,outfolder,columns=sheet.columns)
                 docs[xmlfile]=is_new
             except Exception as e:
