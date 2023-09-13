@@ -55,7 +55,7 @@ class Mapper(AMMapper):
         t is a tuple from DataFrame.itertuples()
         '''
         # ensure the root has no prefix.
-
+        
         pid = self.find_pid4id(t.BuildPlateID)
         is_new=False
         amroot=amdoc.AMDoc()
@@ -124,10 +124,14 @@ class Mapper(AMMapper):
         pds=self.part_definitions(t.BuildPlateID)
         if len(pds) > 0:
             plate.partDefinition=pds
-
+            
         xmlfile=f"{outfolder}/{t.BuildPlateID}.xml"
         with open(xmlfile,"w") as f:
-            f.write(prettify(amroot.toxml("utf-8").decode('utf-8')))
+            try:
+                f.write(prettify(amroot.toxml("utf-8").decode('utf-8')))
+            except:
+                print(traceback.format_exc(), file=sys.stderr, flush=True)
+
         return xmlfile, is_new
 
     def map_from_excel(self, outfolder,verbose=False):
