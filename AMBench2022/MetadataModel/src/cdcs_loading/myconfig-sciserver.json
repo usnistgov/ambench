@@ -1,0 +1,13 @@
+{ 
+ "TEMPLATE": "AMDocs", 
+ "AMBENCH_URL": "https://ambench2022.nist.gov/",
+ "LOADING": "/home/idies/workspace/Storage/jkim485/persistent/AMBench/ambench/AMBench2022/MetadataModel/src/cdcs_loading", 
+ "ROOT_SCHEMA": "AMDocs.xsd", 
+ "XSD": "/home/idies/workspace/Storage/jkim485/persistent/AMBench/ambench/AMBench2022/MetadataModel/Model/XSD/",     
+ "pyUTILS_path": "../py",
+ "SAMPLES_EXCEL_FILE": "/home/idies/workspace/Storage/jkim485/persistent/AMBench/ambench/AMBench2022/MetadataModel/Model/xlsx/AM-Bench 2022 Samples.xlsx",
+ "MEAS_EXCEL_FILE": "../../Model/xlsx/AM-Bench 2022 Measurements.xlsx",
+ "CONTRIBUTORS_EXCEL_FILE": "/home/idies/workspace/Storage/jkim485/persistent/AMBench/ambench/AMBench2022/MetadataModel/Model/xlsx/Contributors.xlsx",
+ "USER": "",
+ "PASS": ""   
+}
