@@ -3,3 +3,4 @@ xmlschema
 git+https://github.com/usnistgov/pycdcs
 openpyxl
 openpyxl-image-loader
+qrcode
