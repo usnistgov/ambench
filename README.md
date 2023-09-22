@@ -24,7 +24,19 @@ Codes and scripts in this repository are categorized into three groups, each of 
 Some of the AM Bench data sets are large (> 1 TB) and may require processing to extract desired quantities. Since it is impractical to require all AM Bench users to download such large datasets and to develop all their own codes for extracting meaningful results, the AM Bench project is providing with [SciServer](https://sciserver.org/) to provide server-side processing through SciServer Compute. 
 
 AM Bench users can register to SciServer to use virtual machines that include Jupyter notebooks and pre-installed software packages for AM Bench data analysis. A mirror of the AM Bench public measurement data on the [NIST  Public Data Repository(PDR)](https://data.nist.gov/pdr/about) is maintained on the SciServer platform and search features are available.  For further details on AM Bench data on SciServer please see https://sciserver.org/datasets/ambench/#sciserver.
-For the step-by-step instructions to how to run analyze data on SciServer in container enviroments please see
+For detailed instructions on how run the code and scripts for AM Bench project with SciServer, see the [Getting started with AM Bench in SciServer](https://sciserver.org/support/getting-started-ambench/) page.
+
+For cloning this repository to SciServer Compute container:
+- Go to https://github.com/usnistgov/ambench in a separate browser window.
+- Click the green ‘Code’ button and copy the HTTP URL for the repository, ‘repo-url.’ 
+- In Jupyter notebook running in SciServer Compute container click the ‘New’ button to the upper right and select ‘Terminal’ from the list. This will open a Linux console.  
+- Create the folder where you wish to clone the repository. Go to that folder.
+- Enter the following from the command line:
+
+  ```git clone ‘repo-url’```
+  
+For additional software package requirements and their installation instructions for individual script or code not in this section  please refer to documentation provided the authors.
+  
 
 <!--   
    - Statements of purpose and maturity
