@@ -20,7 +20,7 @@ This repository is setup for code sharing in support of the [NIST AMBench 2022 p
 		* [SciServer](#sciserver)
 		* [Local environment](#Local)
 * [How to contribute codes](#Contributing)
-* [Contact information](#contact-information)
+* [Contact Information](#contact-information)
 * [Related Material](#RelatedMaterial)
 * [How to cite](#Citation)
 * [References](#References)
@@ -45,7 +45,7 @@ AM Bench users can register to SciServer to use virtual machines that include Ju
 -->   
 ### How to contribute codes
 * TBD
-### Contact information
+### Contact Information
 * Lyle E. Levine
 lyle.levine@nist.gov
 (301) 975-6032
