@@ -3,49 +3,49 @@
 ## About
 This repository is setup for code sharing in support of the [NIST AMBench 2022 project](https://www.nist.gov/ambench). Code and scripts shared in this repository are categorized into three groups, each of which is located in its own folder. 
 
-* ContributedCodeANDScripts 
+#### ContributedCodeANDScripts 
 
    Analysis code and scripts which make use of the AM Bench 2022 data but are not developed as part of the AM Bench project. 
-* MetadataModel 
+#### MetadataModel 
 
    The [XML Schema](https://www.w3.org/XML/Schema) of a data model that describes the AM Bench 2022 data and the python scripts translating AM Bench metadata to XML documents conforming to this XML schema that are published in [AM Bench 2022 CDCS](https://ambench2022.nist.gov/) database.
 
-* ReferenceCodeANDScripts
+#### ReferenceCodeANDScripts
 
    Analysis code and scripts developed as part of the AM Bench 2022 project. 
 
 ## Table of Content
 * [How to Use this Repository](#Usage)
-	* [How to run code and scripts](#method)
-		* [SciServer](#sciserver)
+	* [How to run code and scripts](#RunCode)
+		* [SciServer](#SciServer)
 		* [Local environment](#Local)
 * [How to contribute codes](#Contributing)
-* [Contact Information](#csc)
+* [Contact information](#Contact)
 * [Related Material](#RelatedMaterial)
 * [How to cite](#Citation)
 * [References](#References)
 * [Terms of Use](#Terms)
-* [CODEOWNERS](#Owners)
+* [CODEOWNERS](#Codeowners)
 
 
-## How to Use this Repository<a name="Usage"></a> 
-### How to run code and scripts<a name="method"></a>
-#### SciServer
+## <a name="Usage">How to Use this Repository</a> 
+### <a name="RunCode"/>How to run code and scripts</a> 
+#### <a name="SciServer">SciServer</a>
 Some of the AM Bench data sets are large (> 1 TB) and may require processing to extract desired quantities. Since it is impractical to require all AM Bench users to download such large datasets and to develop all their own code for extracting meaningful results, the AM Bench project is providing with [SciServer](https://sciserver.org/) to provide __server-side processing through SciServer Compute__. 
 
 AM Bench users can register to SciServer to use virtual machines that include Jupyter notebooks and pre-installed software packages for AM Bench data analysis. A mirror of the AM Bench public measurement data on the [NIST  Public Data Repository(PDR)](https://data.nist.gov/pdr/about) is maintained on the SciServer platform and search features are available.  For detailed instructions on how to use AM Bench data with SciServer, see our [Getting started with AM Bench](https://sciserver.org/support/getting-started-ambench/) page. 
 
 
-#### Running code and scripts in local environment
+#### <a name="Local">Running code and scripts in local environment</a>
 * Since data requirements and software requirements including their installation depend on code or scripts  please follow the instructions provided by code owners.
 
 <!--   
    - Statements of purpose and maturity
    - Technical installation instructions
 -->   
-### How to contribute codes
+### <a name="Contributing">How to contribute codes</a>
 * TBD
-### <a name="csc">Contact information</a>
+### <a name="Contact">Contact information</a>
 * Lyle E. Levine
 lyle.levine@nist.gov
 (301) 975-6032
@@ -61,17 +61,19 @@ brandon.lane@nist.gov
    - Details of mailing lists, chatrooms, and discussion forums,
      where applicable
 -->
-### Related Material
+### <a name="RelatedMaterial">Related Material</a>
    - URL for associated project on <nist.gov> or other Department of
      Commerce site, if available
    - References to user guides if stored outside of GitHub
-### Directions on appropriate citation with example text
-### References to any included non-public domain software modules
+### <a name="Citation">Citation</a>
+Directions on appropriate citation with example text
+### <a name="References">References</a> 
+References to any included non-public domain software modules
 
-### Terms of Use: `LICENSE.md`
+### <a name="Terms">Terms of Use</a>
 
 See the License.md file in this repository
 
-### CODEOWNERS
+### <a name="Codeowners">CODEOWNERS</a>
 
 
