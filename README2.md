@@ -15,7 +15,7 @@ This repository is setup for code sharing in support of the [NIST AMBench 2022 p
    Analysis code and scripts developed as part of the AM Bench 2022 project. 
 
 ## Table of Content
-* [How to Use this Repository](#Usage)
+* [How to Use this Repository](#How-to-use-this-repository)
 	* [How to run code and scripts](#RunCode)
 		* [SciServer](#SciServer)
 		* [Local environment](#Local)
@@ -28,7 +28,7 @@ This repository is setup for code sharing in support of the [NIST AMBench 2022 p
 * [CODEOWNERS](#Codeowners)
 
 
-## <a name="Usage">How to Use this Repository</a> 
+## <a name="How-to-use-this-repository">How to Use this Repository</a> 
 ### <a name="RunCode"/>How to run code and scripts</a> 
 #### <a name="SciServer">SciServer</a>
 Some of the AM Bench data sets are large (> 1 TB) and may require processing to extract desired quantities. Since it is impractical to require all AM Bench users to download such large datasets and to develop all their own code for extracting meaningful results, the AM Bench project is providing with [SciServer](https://sciserver.org/) to provide __server-side processing through SciServer Compute__. 
