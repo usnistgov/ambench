@@ -1,6 +1,0 @@
-pyxb==1.2.6
-xmlschema==2.4.0
-git+https://github.com/usnistgov/pycdcs
-openpyxl==3.0.5
-openpyxl-image-loader==1.0.5
-qrcode==7.4.2

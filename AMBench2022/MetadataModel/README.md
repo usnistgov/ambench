@@ -1,6 +1,6 @@
 # About
 
-```MetadataModel``` contains the [XML Schema](https://www.w3.org/XML/Schema) of a data model that describes the AM Bench 2022 data and the Python scripts which translate AM Bench metadata to XML documents conforming to this XML schema.
+```MetadataModel``` contains the [XML Schema](https://www.w3.org/XML/Schema) of a data model that describes the AM Bench 2022 data and the Python scripts which translate AM Bench metadata from tabular format in Excel file to XML documents conforming to this XML schema and uploading the schema and XML documents to [AM Bench 2022 CDCS](https://ambench2022.nist.gov/). It also has the Excel files containing the AM Bench metadata. 
 
 The data model provides a robust set of metadata for the build processes and their resulting specimens and for measurements made on these in the context of the AM Bench 2022 project.
 
@@ -46,7 +46,7 @@ In this folder there are Excel files which contain the metadata describing the b
 
 ### XSD
 It contains the xsd files which contain the XML Schemas of a data model for the AM Bench 2022 project. 
-* ```AMDocs.xsd``` contains the XML schema which represents a root element for an AM Bench XML document. 
+* ```AMDocs.xsd``` contains the XML schema in which a root element for an AM Bench XML document is defined. 
 * ```AMBuild.xsd``` contains the XML schema which  describes the build processes and their resulting specimens including their source materials.
 
 * ```AMMeasurement.xsd``` contains the XML schema for characterization measurements conducted in the AMBench 2022 project.
@@ -58,7 +58,7 @@ This is the main folder for source code including Python scripts which translate
 This folder includes ipython notebooks for generating XML files and managing schemas and XML files in the AM Bench CDCS database using the Python modules at ```src/py/ambench```
 * ```config.py``` - a Python class which encapsulates configuration parameters required in order to run the ipython notebooks in this folder. You can find a configuration template required for ```config.py``` in ```config.json.template```.
 * ```Excel to XML.ipynb``` - an ipython notebook for generating XML files from the metadata in the Excel files in ```Model/XLSX``` and uploading them into the AM Bench CDCS database.
-* ```XML Schema to Template Loader.ipynb``` - an ipython notebook for uploading the schemas located in ```Model/XSD```and the generated XML files by running ```Excel to XML.ipynb``` into the AM Bench CDCS database.
+* ```XML Schema to Template Loader.ipynb``` - an ipython notebook for uploading the schemas located in ```Model/XSD```and the generated XML files into the AM Bench CDCS database.
 
 
 
@@ -70,7 +70,7 @@ In this folder there are Python modules developed for mapping the metadata from 
 * ```amdoc.py``` - Python classes which correspond 
  to data structures defined in the schema in ```Model/XSD/AMDocs.xsd``` using Python package [PyXB](https://pypi.org/project/PyXB/).
  
-* ```cdcs_utils.py``` - A Python module which contains utility functions for querying the CDCS database and uploading schemas and XML files into CDCS using the CDCS REST API. It extends ```CDCS``` from ```pycdcs``` (https://github.com/usnistgov/pycdcs).
+* ```cdcs_utils.py``` - A Python module which contains utility functions for querying the CDCS database and uploading schemas and XML files into CDCS using the CDCS REST API. It extends ```CDCS``` class from ```pycdcs``` (https://github.com/usnistgov/pycdcs).
 
 * ```mappers.py``` - A Python module which contains a base class ```AMMapper``` for creating XML document from the metadata describing AM Bench resources. The AM Bench resources include
 samples, build process and measurements.
@@ -85,11 +85,11 @@ samples, build process and measurements.
 The easiest way to run the code published in ```MetadataModel``` folder  is using SciServer Compute since Jupyter notebooks, pre-installed software packages and all the code and scripts in this repository are readily available for all AM Bench users.
 
 * Get ready with SciServer - Please follow the instructions on [Getting started with AM Bench](https://sciserver.org/support/getting-started-ambench/) page. The tutorial includes creating a SciServer account, getting access to the AM Bench data, code and scripts, and creating a container in SciServer Compute.
-* Install additional Python packages required for running the code in ```MetadataModel``` from the Jupyter Notebook in the container of SciServer Compute. Go to ```MetadataModel``` folder and run the following command from a Linux console in Jupyter Notebook:
+* Install additional Python packages required for running the code in ```MetadataModel``` from the Jupyter Notebook in your container in SciServer Compute. Go to ```MetadataModel``` folder and run the following command from a Linux console in Jupyter Notebook:
 	
 	```pip install -r requirements.txt``` 
 
-* You are ready to run ```ipynb``` notebooks in ```MetadataModel/src/cdcs_loading```. How to run these notebooks please see the documentations included in the notebooks themselves.
+* You are ready to run ```ipynb``` notebooks in ```MetadataModel/src/cdcs_loading```. For running these notebooks please see the documentations included in the notebooks themselves.
 
 ## Local environment
 * Requirements: Linux OS, Anaconda 2020.11 for Linux OS.
@@ -111,5 +111,5 @@ The easiest way to run the code published in ```MetadataModel``` folder  is usin
 
   ```git clone <repo-url>```
 
-* You are ready to run ```ipynb``` notebooks in ```MetadataModel/src/cdcs_loading```. How to run these notebooks please see the documentations included in the notebooks themselves.
+* You are ready to run ```ipynb``` notebooks in ```MetadataModel/src/cdcs_loading```. For how to run these notebooks please see the documentations included in the notebooks themselves.
 
