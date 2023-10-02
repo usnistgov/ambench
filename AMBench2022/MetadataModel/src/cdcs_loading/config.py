@@ -1,7 +1,7 @@
 # ====================================================================================
-# Phython class which encapsulates configuraton parameters required in order to run 
-# ipython notebooks for uploading snf updating schemas or generating XML documents 
-# in your local environement and uploading them in CDCS AM Bench instance.
+# Python class which encapsulates configuration parameters required in order to run 
+# ipython notebooks for uploading schemas or generating XML documents 
+# uploading them in CDCS AM Bench instance.
 #
 # ======================================================================================
 import json
@@ -11,16 +11,16 @@ class __CONFIG():
         '''
         Initialize configuration parameters by reading a JSON file passed on argument conf_json.
         
-        The default configuration parameters defined in 'default_conf.json':
+        Create your own configuration file using config.json.template.
         
-        The required parameters are denoted by (*).
+        The parameters are:
            "TEMPLATE"(*): Template title given to the AM Bench project schema(s) in CDCS database. Its default is "AMDocs".
            "AMBENCH_URL"(*): URL of CDCS instance of AM Bench project. Its default is "https://ambench2022.nist.gov/" 
                           for querying XML documents. For uploading and updating XML schemas and documents 
                           you must use the CDCS private AM Bench site.
            "LOADING"(*): The path to the folder in which "Excel to XML.ipynb" and "XML Schema to Template Loader.ipynb" are.
            "ROOT_SCHEMA"(*): The schema file name which contains the definition of a root element of AM Bench XML documents.  
-           "XSD"(*): The path to the folder in which XSD files are including ROOT_SCHEMA.
+           "XSD"(*): The path to the folder a trailing slash in which the XSD files are.
            "pyUTILS_path"(*): The path to the folder in which cdcs_utils.py is.
            "SAMPLES_EXCEL_FILE"(*): The file name for samples excel file including its file path.
            "MEAS_EXCEL_FILE"(*): The file name for measurements excel file including its file path.
