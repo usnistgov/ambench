@@ -1,3 +1,7 @@
+#=================================================
+# Mapper class for AMThermography 
+#=================================================
+
 import io
 import pandas
 import string
@@ -11,48 +15,54 @@ from ambench.mappers import AMMapper
 from ambench.measurement_mappers import AMMeasurementMapper 
 
 import itertools
+import traceback
+import sys
 
 class Mapper(AMMeasurementMapper):  
     DOC_TYPE='AMMechanicalTesting'
     SHEET='Mechanical_testing'
-#     IMAGE_COLUMN='Specimen_measurement_geometry_diagrams_and_photos'
-#     IMAGE_COLUMN_CELLS=IMAGE_COLUMN+"__cells"
 
     def __init__(self, ambench2022, CONFIG):
         super().__init__(ambench2022,Mapper.DOC_TYPE, CONFIG)
 
-    def mechanicaltesting_toxml(self,i, df,outfolder,columns, pids, images):
-
-        t = df.iloc[0]
-        identifier=createId(t.Measurement_identifier, "Internal")
-        ID = identifier.id
-#         MQ=({f"AMDoc.{Mapper.DOC_TYPE}.name": ID})
-#         amroot=self.ambench2022.mongo_query(MQ)
-#         if amroot is None or len(amroot) == 0:
-#             amroot=amdoc.AMDoc()
-#             amroot.pid=""
-#             measurement=amdoc.MechanicalTestingMeasurement()
-#             amroot.AMMechanicalTesting=measurement
-#             is_new=True
-#         else:
-#             measurement = amroot.AMMechanicalTesting
-#             is_new=False
-
-        pid = self.find_pid4id(ID)
-        is_new=False
-        amroot=amdoc.AMDoc()
-        measurement=amdoc.MechanicalTestingMeasurement()
-        amroot.AMMechanicalTesting=measurement
-        if pid is None:
-            amroot.pid=""
-            print("Did not find:",ID,"new doc from excel")
-            is_new=True
-        else:
-            print("Found:",ID," ==> ",pid,"update doc from excel")
-            amroot.pid=pid
-
-
-        measurement = self.fillTemplateMeasurement(measurement, identifier, df, columns, pids, images, '%Y-%m-%d %H:%M:%S')
+    def map_from_excel(self, outfolder,verbose=False):
+        return self.do_map(outfolder,Mapper.SHEET,verbose)
+        
+    def map_fromtable_toxml(self,i, df, anno_df, docu_df, outfolder,columns, pids, images):
+        '''
+        df: metadata data frame for a single measurement of a single measurement type.
+        anno_df: column description data frame defined in the measurement Excel spreadsheet.
+        docu_t: metadata data frame describing the measurement type of the metadata given in df. 
+        outfolder: local folder where a resultant XML file is written.
+        columns: list of column names defined in the sheet 
+        pids: All PIDS existing in a CDCS database.
+        images: All images existing in a CDCS database.
+        '''
+        
+        amroot = amdoc.AMDoc()
+        measurement = amdoc.MechanicalTestingMeasurement()
+        try:
+            t = df.iloc[0]
+            an = anno_df.iloc[1] #Annotation        
+            identifier=createId(t.Measurement_identifier, AMMapper.DEFAULT_ID_TYPE)
+            ID = identifier.id
+            pid = self.find_pid4id(ID)
+            is_new=False
+            amroot.AMMechanicalTesting=measurement
+            if pid is None:
+                amroot.pid=""
+                print("Did not find:",ID,"new doc from excel")
+                is_new=True
+            else:
+                print("Found:",ID," ==> ",pid,"update doc from excel")
+                amroot.pid=pid
+        except:
+            print(traceback.format_exc(), file=sys.stderr, flush=True)  
+        
+        try:
+            measurement = self.fillTemplateMeasurement(measurement, identifier, df, docu_df, columns, pids, images, '%Y-%m-%d %H:%M:%S')
+        except:
+            print(traceback.format_exc(), file=sys.stderr, flush=True)  
 
 #             Instrument Custom metadata and Experiment Configuration ######
         try:
@@ -60,13 +70,14 @@ class Mapper(AMMeasurementMapper):
             ins_name = maybe_string(t.Instrument, na='NA')
             if ins_name is None:
                 raise Exception
-        
             sens = []
             sen_dic = {"type":"Load Cell", "model":t.Load_cell, "range":newRange(t.Load_cell_range, u=t.Load_cell_units)}
             sens.append(self.createSensor(sen_dic, 'NA'))
-
             if maybe_string(t.Extensometer, na='NA') is not None:
-                sen_dic = {"type":"Extensometer", "description":t.Extensometer_description}
+                metadata = amdoc.ObjectType()
+                add2ObjectType(metadata, k="Extensometer_gauge_length"\
+                               , v=newPhysicalQuantity(t.Extensometer_gauge_length, u=t.Extensometer_gauge_length_units), na = 'NA')
+                sen_dic = {"type":"Extensometer", "description":t.Extensometer_description, "metadata":metadata}
                 sens.append(self.createSensor(sen_dic, 'NA'))
             sens = [s for s in sens if s is not None]
 
@@ -74,30 +85,22 @@ class Mapper(AMMeasurementMapper):
             add2ObjectType(metadata, k="Grip_description", v=t.Grip_description, na = 'NA')
             insConfig = self.add2Instrument(insConfig, ins_name, metadata=metadata, dets=None, sens=sens)
             measurement.measurementMethod.instrumentConfiguration = insConfig
-            
-        except:    
+            expConfig = amdoc.ExperimentConfiguration()
+            configObjs = []
+            configObj = amdoc.ConfigurationObject()
+            ins_ref = amdoc.InstrumentRef()
+            ins_ref.instrumentName = ins_name
+            configObj.associatedInstrument = [ins_ref] 
+            add2ObjectType(configObj, k="Cross_head_speed", v=newPhysicalQuantity(t.Cross_head_speed, u=t.Cross_head_speed_units), na='NA', desc=an.Cross_head_speed)
+
+            add2ObjectType(configObj, k="Average_strain_rate", v=newPhysicalQuantity(t.Average_strain_rate, u=t.Average_strain_rate_units), na='NA', desc=an.Average_strain_rate)
+            add2ObjectType(configObj, k="Sampling_interval", v=newPhysicalQuantity(t.Sampling_interval, u=t.Sampling_interval_units), na='NA', desc=an.Sampling_interval)
+            configObjs.append(configObj)
+            expConfig.component = configObjs
+            measurement.measurementMethod.experimentConfiguration=expConfig
+        except Exception as e:    
             print(f"WARNING: Failed to add custom Instrument metadata to Instrument {ins_name}.")
-            
-        expConfig = amdoc.ExperimentConfiguration()
-        configObjs = []
-        configObj = amdoc.ConfigurationObject()
-        ins_ref = amdoc.InstrumentRef()
-        ins_ref.instrumentName = ins_name
-        configObj.associatedInstrument = [ins_ref] 
-        add2ObjectType(configObj, k="Cross_head_speed", v=newPhysicalQuantity(t.Cross_head_speed, u=t.Cross_head_speed_units), na='NA')
-        configObjs.append(configObj)
-        
-        configObj = amdoc.ConfigurationObject()
-        configObj.associatedInstrument = [ins_ref] 
-        add2ObjectType(configObj, k="Average_strain_rate", v=newPhysicalQuantity(t.Average_strain_rate, u=t.Average_strain_rate_units), na='NA')
-        configObjs.append(configObj)
-        configObj = amdoc.ConfigurationObject()
-        configObj.associatedInstrument = [ins_ref] 
-        add2ObjectType(configObj, k="Sampling_interval", v=newPhysicalQuantity(t.Sampling_interval, u=t.Sampling_interval_units), na='NA')
-        configObjs.append(configObj)
-        
-        expConfig.component = configObjs
-        measurement.measurementMethod.experimentConfiguration=expConfig
+
 
 #    Custom Specimen Metadata
         try:
@@ -127,8 +130,7 @@ class Mapper(AMMeasurementMapper):
             out.dataSet.append(ds)
 
         isNewDS, ds = self.getDataSet(out, 'Processed Data')
-        add2DataSet(ds,k="Processed_Engineering_Stress_Strain", v=newDigitalArtifact(typ="file", url= t.Processed_Engineering_Stress_Strain), na='NA')
-#         add2DataSet(ds,k="Uncertainty_analysis", v=newDigitalArtifact(typ="file", url= t.Uncertainty_analysis), na='NA')
+        add2DataSet(ds,k="Processed_Engineering_Stress_Strain", v=newDigitalArtifact(typ="file", url= t.Processed_Engineering_Stress_Strain), na='NA', desc=an.Processed_Engineering_Stress_Strain)
         if isNewDS == True:
             out.dataSet.append(ds)
 
@@ -139,33 +141,5 @@ class Mapper(AMMeasurementMapper):
             f.write(prettify(amroot.toxml("utf-8").decode('utf-8')))
         return xmlfile,is_new
         
-    def map_from_excel(self, outfolder,verbose=False):
-        EXCEL_FILE=self.CONFIG.MEAS_EXCEL_FILE
-        CONTRIBUTORS_EXCEL_FILE=self.CONFIG.CONTRIBUTORS_EXCEL_FILE
-#         ID_DOC_MAP=self.ambench2022.docs_by_name_AMDOC(Mapper.DOC_TYPE)
-
-        sheets=self.read_excel(EXCEL_FILE)
-        sheet=sheets[Mapper.SHEET] 
-        pyxl_doc = openpyxl.load_workbook(EXCEL_FILE)
-        pyxl_sheet = pyxl_doc[Mapper.SHEET]
         
-        # check whether images exist for any of the processing steps for these specimens and load those
-        # returned a dict checksum:handle of all loaded blobs
-        # first retrieve images, then throw uhman_readonly columns. otherwise the matching between cells wiht images goes awry
         
-        if Mapper.IMAGE_COLUMN not in sheet.columns:
-            sheet[Mapper.IMAGE_COLUMN]=''        
-        images = self.retrieveAndLoadImages(sheet,pyxl_sheet,Mapper.IMAGE_COLUMN, Mapper.IMAGE_COLUMN_CELLS)
-        sheet = sheet[sheet['Human_readonly'] != 'Y']
-
-        docs={}
-        pids_amspecimen = self.ambench2022.pids_by_name('AMBSpecimen')
-        pids={name:(pid,'AMBSpecimen') for name,pid in pids_amspecimen.items()}
-        pids_ambuildpart = self.ambench2022.pids_by_name('AMBuildPart')
-        pids={**pids,**{name:(pid,'AMBuildPart') for name,pid in pids_ambuildpart.items()}}
-
-        for i, df in sheet.groupby('Measurement_identifier'):
-#             print(i, "\n", sheet.columns)
-            xmlfile,is_new=self.mechanicaltesting_toxml(i, df,outfolder,sheet.columns, pids, images)
-            docs[xmlfile]=is_new
-        return docs      

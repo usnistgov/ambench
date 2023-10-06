@@ -1,0 +1,2004 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+  <!-- base types related to Resource-s, i.e. entities represented in an AMBench CDCS instance as document with PID assigned 
+    etc. -->
+  <xs:complexType name="AMResource" abstract="true">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a generic resource in the AM Bench
+      project (https://www.nist.gov/ambench) such as samples and measurements.  
+      In the NIST CDCS database, an AM Bench resource is represented as an XML document 
+      with a persistent identifier (PID) assigned by the database.  
+      In the schema, AMResource is the ultimate 
+      base type for other more explicit AMBench documents 
+      such as documents for AMBuildPlates, AMPowder, AMRadiography, etc.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" minOccurs="1" maxOccurs="1" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Name</label>
+          </xs:appinfo>
+          <xs:documentation>The name of a resource. It is used as an identifier.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>The description of a resource</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="documentation" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Documentation</label>
+          </xs:appinfo>
+          <xs:documentation>The URI of a document which contains an extended 
+          description of a resource.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="primaryContact" type="Person" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Primary contact</label>
+          </xs:appinfo>
+          <xs:documentation>The primary contact for the content of a resource</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="contributor" type="Contributor" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Contributor</label>
+          </xs:appinfo>
+          <xs:documentation>The contributors to the content of a resource</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="note" type="Note" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Note</label>
+          </xs:appinfo>
+          <xs:documentation>Any information, usually in text or image files, 
+          related to a resource which is not included in the elements of 'AMResource'.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="altName" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Alternate Name</label>
+          </xs:appinfo>
+          <xs:documentation>Any alternate name like an acronym or nickname of a resource.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="UUID" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>UUID</label>
+          </xs:appinfo>
+          <xs:documentation>A universal unique identifier of a resource.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="identifier" type="identifier" maxOccurs="unbounded" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Identifier</label>
+          </xs:appinfo>
+          <xs:documentation>Any identifiers which are associated with a resource 
+          other than its name, alternate names, PID, or UUID</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="journalPublication" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Journal publication</label>
+          </xs:appinfo>
+          <xs:documentation>The list of publications resulting from a resource. 
+          for example, the publication 10.1016/j.procir.2020.09.135 resulted 
+          from the radiography measurements in the AM Bench project.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="referencePublication" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Reference publication</label>
+          </xs:appinfo>
+          <xs:documentation>The list of any reference publications relevant to 
+          a resource other than those listed in journalPublication of a resource.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <!-- Standard name and link are mapped to title, and url -->
+      <xs:element name="relatedStandard" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Related standard</label>
+          </xs:appinfo>
+          <xs:documentation>The list of standards related to a resource. 
+          For example, the standards with which mechanical testing measurements 
+          comply.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AMActivity" abstract="true">
+    <xs:annotation>
+      <xs:documentation>It is a base type for any XML schema types for 
+      any AM Bench resource representing an activity.  It extends 'AMResource'. Some examples 
+      of activities in the AM Bench project are procurement of powder, various build processes,  
+      measuring the composition of samples,
+      laser absorptivity measurements, etc.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMResource">
+        <xs:sequence>
+          <xs:element name="startDate" minOccurs="0" maxOccurs="1" type="xs:dateTime">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Start date</label>
+              </xs:appinfo>
+              <xs:documentation>A date or a date + time that an activity started</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="completeDate" minOccurs="0" maxOccurs="1" type="xs:dateTime">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Complete date</label>
+              </xs:appinfo>
+              <xs:documentation>A date or a date + time that an activity is completed</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="identifier">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents an identifier of any object to which
+      identifier(s) can be assigned.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Identifier</label>
+          </xs:appinfo>
+          <xs:documentation>The value of an identifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="type" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of an identifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Field">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a member in the definition 
+      of 'ObjectType'. It consists of a 'name' and 'value' pair, where the type of a value can 
+      be a string, 'physical-quantity-type', 'DigitalArtifact' or 'ObjectType'.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Name</label>
+          </xs:appinfo>
+          <xs:documentation>The name of a field</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="value" type="xs:string">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Value</label>
+            </xs:appinfo>
+            <xs:documentation>The value of a field whose type is string</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="quantity" type="physical-quantity-type">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Quantity</label>
+            </xs:appinfo>
+            <xs:documentation>The value field of type 'physical-quantity-type'</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="object" type="ObjectType">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Object</label>
+            </xs:appinfo>
+            <xs:documentation>The value field of type 'ObjectType'</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="digitalArtifact" type="DigitalArtifact">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Digital artifact</label>
+            </xs:appinfo>
+            <xs:documentation>The value field of type 'DigitalArtifact'</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:choice>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>The description of a field</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="documentationLink" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Documentation</label>
+          </xs:appinfo>
+          <xs:documentation>The URI of a documentation related to a field</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ObjectType">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which enables the declaration of a 
+      structured data type. It is similar to a class in object oriented languages 
+      or 'complexType' in XML schema. In general, it consists of a group of fields
+      where the type of each attribute can be a primitive data type or another 'ObjectType'.
+      For example, an XML element ‘specimenMetadata’ defined in the AM Bench measurement schema
+        is a type of ‘ObjectType’ since metadata specific to any given specimen 
+        can require arbitrary fields.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Name</label>
+          </xs:appinfo>
+          <xs:documentation>The name of an object type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>The description of an object type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="field" type="Field" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Field</label>
+          </xs:appinfo>
+          <xs:documentation>A member of an object type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="ArtifactType">
+    <xs:annotation>
+      <xs:documentation>The enumeration of the artifact types that are 
+      defined in the AM Bench project</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AMBuildPlate">
+        <xs:annotation>
+          <xs:documentation>AM Bench Build Plate</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AMBuildPart">
+        <xs:annotation>
+          <xs:documentation>AM Bench Build Part</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AMBSpecimen">
+        <xs:annotation>
+          <xs:documentation>AM Bench Specimen</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AMPowder">
+        <xs:annotation>
+          <xs:documentation>AM Bench Powder</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Material">
+        <xs:annotation>
+          <xs:documentation>Material</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="MaterialInfo">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which describes an ultimate source material 
+      of a physical artifact produced in the AM Bench project.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="materialClass" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Material class</label>
+          </xs:appinfo>
+          <xs:documentation>Material class.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="sourceMaterialId" type="xs:anyURI" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Source material ID</label>
+          </xs:appinfo>
+          <xs:documentation>The name of a source material</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- UTILITIES -->
+  <xs:complexType name="Note">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents any supplementary information relevant to  
+      'AMResource' which is not among the elements of 'AMResource' or its extensions</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Title</label>
+          </xs:appinfo>
+          <xs:documentation>Title of a note</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="date" type="xs:dateTime" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Creation date</label>
+          </xs:appinfo>
+          <xs:documentation>Date when a note is created</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="text" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Text</label>
+          </xs:appinfo>
+          <xs:documentation>The text of a note.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="digitalArtifact" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Digital artifact</label>
+          </xs:appinfo>
+          <xs:documentation>Any file, folder or database of a note.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DigitalArtifact">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a digital object (e.g., file, folder 
+      or database) created as a result of activities or relevant to a resource in the AM Bench project. 
+      Examples are access URLs to various raw data or processed data from measurements 
+      in the AM Bench project.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="identifier" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Identifier</label>
+          </xs:appinfo>
+          <xs:documentation>An identifier of a digital artifact including its name</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="DOI" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>DOI</label>
+          </xs:appinfo>
+          <xs:documentation>DOI (Digital object identifier) of a digital artifact</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="title" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Title</label>
+          </xs:appinfo>
+          <xs:documentation>Title of a digital artifact</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="description" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>Description of a digital artifact</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="type" type="DigitalArtifactType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type</label>
+          </xs:appinfo>
+          <xs:documentation>Type of a digital artifact. The allowed values are 
+          file, folder, and database. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="format" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Format</label>
+          </xs:appinfo>
+          <xs:documentation>Data format of a digital artifact. Examples are
+           pdf, jpeg, png, and etc.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="comment" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Comment</label>
+          </xs:appinfo>
+          <xs:documentation>Any supplementary comment on a digital artifact</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="accessURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Download URL</label>
+          </xs:appinfo>
+          <xs:documentation>A URL which provides a direct access to a digital artifact.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="DigitalArtifactType">
+    <xs:annotation>
+      <xs:documentation>The enumeration of digital artifact types</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="file">
+        <xs:annotation>
+          <xs:documentation>File</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="folder">
+        <xs:annotation>
+          <xs:documentation>Folder</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="database">
+        <xs:annotation>
+          <xs:documentation>Database</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="AMBlobReference">
+    <xs:annotation>
+      <xs:documentation>
+        A reference to an AMBlob document. 
+        It contains the handle and the checksum of the actual blob in the AMBlob document.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="handle" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Handle</label>
+          </xs:appinfo>
+          <xs:documentation>
+          The CDCS handle of the blob in a referenced AMBlob document.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="checksum" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Checksum</label>
+          </xs:appinfo>
+          <xs:documentation>
+            The MD5 checksum of the referenced blob bytes. This is a unique 
+          value which can used as an identifier of the AMBlob representing the blob.
+          Its value can be used to check whether the blob was 
+          already uploaded in CDCS or not.          
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>
+            Description of the blob in a referenced AMBlob document.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Blob">
+    <xs:annotation>
+      <xs:documentation>A wrapper providing extra metadata for a blob  
+      in the CDCS database. The blobs are typically images which contain diagrams, or pictures which illustrate 
+        specimen measurement geometry, build plates design, processing steps, 
+        and others. </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="handle" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Handle</label>
+          </xs:appinfo>
+          <xs:documentation> 
+            The CDCS handle of the wrapped blob in the database.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="checksum" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Checksum</label>
+          </xs:appinfo>
+          <xs:documentation>The MD5 checksum of the blob bytes. This is a unique 
+          value which can used as an identifier of the AMBlob representing the blob.
+          Its value can be used to check whether the blob was 
+          already uploaded in CDCS or not. 
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="cdcsPID" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>CDCS PID</label>
+          </xs:appinfo>
+          <xs:documentation>The PID assigned to the blob by CDCS. 
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="format" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Format</label>
+          </xs:appinfo>
+          <xs:documentation>The format of the blob. For example, png, jpeg, and etc.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Person">
+    <xs:annotation>
+      <xs:documentation>A base entity which represents a person.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element maxOccurs="1" minOccurs="0" name="name" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Name</label>
+          </xs:appinfo>
+          <xs:documentation>Name of a person</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="email" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Email</label>
+          </xs:appinfo>
+          <xs:documentation>Email address of a person</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="1" minOccurs="0" name="orcidID" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>ORCID ID</label>
+          </xs:appinfo>
+          <xs:documentation>ORCID ID of a person</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="location" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Location</label>
+          </xs:appinfo>
+          <xs:documentation>Work location of a person</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="phone" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Phone number</label>
+          </xs:appinfo>
+          <xs:documentation>Phone number of a person</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="affiliation" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Affiliation</label>
+          </xs:appinfo>
+          <xs:documentation>Affiliation of a person</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Contributor">
+    <xs:annotation>
+      <xs:documentation>A type representing a person who contributes to a resource 
+       in the AM Bench project</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="person" type="Person" minOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Person</label>
+          </xs:appinfo>
+          <xs:documentation>A reference to a person.  </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="role" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Role</label>
+          </xs:appinfo>
+          <xs:documentation>A role that a person plays in various aspects of a resource. 
+            For example, primary contact, owner, custodian, responsible party, and etc.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Instrument">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which describes an instrument used in an
+      AM Bench measurement. It also includes the metadata for its configuration and usage
+      in a measurement</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMResource">
+        <xs:sequence>
+          <xs:element name="model" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Model</label>
+              </xs:appinfo>
+              <xs:documentation>The model of an instrument</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="physicalLocation" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Physical location</label>
+              </xs:appinfo>
+              <xs:documentation>The physical location of an instrument</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="instrumentMetadata" type="ObjectType" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Instrument metadata</label>
+              </xs:appinfo>
+              <xs:documentation>The special metadata which apply to a specific instrument including 
+              its configuration in a measurement</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="detector" type="Sensor" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Detector</label>
+              </xs:appinfo>
+              <xs:documentation>The detector of an instrument used in a measurement</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="sensor" type="Sensor" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Sensor</label>
+              </xs:appinfo>
+              <xs:documentation>The sensor of an instrument used in a measurement</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="supportingFile" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Supporting file</label>
+              </xs:appinfo>
+              <xs:documentation>Any supplementary digital artifacts for
+              the description and configuration of an instrument 
+              in a measurement</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Sensor">
+    <xs:annotation>
+      <xs:documentation>The metadata which describes a sensor or detector of an instrument used in a measurement</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Name</label>
+          </xs:appinfo>
+          <xs:documentation>The name of a sensor or detector</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>The description of a sensor or detector</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="type" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of a sensor or detector. For example, 
+          the types of the sensors used in AM Bench mechanical testing measurements 
+          are extensometer and load cell.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="manufacturer" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Manufacturer</label>
+          </xs:appinfo>
+          <xs:documentation>The manufacturer of a sensor or detector</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="model" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Model</label>
+          </xs:appinfo>
+          <xs:documentation>The model of a sensor or detector</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="identifier" type="identifier" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Identifier</label>
+          </xs:appinfo>
+          <xs:documentation>Any identifiers of a sensor or detector</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="calibrationDate" type="xs:dateTime" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Calibration date</label>
+          </xs:appinfo>
+          <xs:documentation>The date when a sensor or detector is calibrated</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="range" type="Range" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Range</label>
+          </xs:appinfo>
+          <xs:documentation>The measurement ranges that a sensor or detector can achieve.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="measurementUncertainty" type="physical-quantity-type" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement uncertainty</label>
+          </xs:appinfo>
+          <xs:documentation>The measurement uncertainty that a sensor or detector can achieve</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="measurementUncertaintyType" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement uncertainty type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of measurement uncertainty.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="specializedMetadata" type="ObjectType" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation>The special metadata which apply to a specific sensor or detector 
+            including its configuration in a measurement</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- ================================== Chemical composition ================================== -->
+  <xs:complexType name="Composition">
+    <xs:annotation>
+      <xs:documentation>The metadata which describes the chemical 
+      composition of a specimen including material, powder, build plates, etc.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Constituents" type="Constituents" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Constituents</label>
+          </xs:appinfo>
+          <xs:documentation>The list of the chemical elements and their quantities 
+          which comprise a specimen</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="quantityUnit" type="ConstituentQuantityUnit" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Quantity units</label>
+          </xs:appinfo>
+          <xs:documentation>The units in which all constituents are expressed for a specimen.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Constituents">
+    <xs:annotation>
+      <xs:documentation>The type which encapsulates the list of the chemical elements and their quantities 
+          which comprise a specimen</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="constituent" type="ConstituentMaterial" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Constituent material</label>
+          </xs:appinfo>
+          <xs:documentation>A constituent material</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ConstituentMaterial">
+    <xs:annotation>
+      <xs:documentation>A type which encapsulates the name of a chemical element and its quantity
+      in a specimen</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="element" type="ChemicalElement" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Chemical element</label>
+          </xs:appinfo>
+          <xs:documentation>The name of a chemical element</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="quantity" type="physical-quantity-type" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Quantity</label>
+          </xs:appinfo>
+          <xs:documentation>The quantity and its measurement uncertainty of a chemical element.</xs:documentation>
+        </xs:annotation>
+      </xs:element> 
+      <xs:element name="isUpperBound" type="xs:boolean" default="false" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Is upper bound?</label>
+          </xs:appinfo>
+          <xs:documentation>An indicator whether a measured quantity is an exact value or an upper bound. 
+          The allowed values are Y or N.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- UNITS -->
+  <xs:simpleType name="LengthUnit">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="picometer">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="um">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="cm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="m">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ConstituentQuantityUnit">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="mass fraction">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mass percent">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mole fraction">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mole percent">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="FlowSpeedUnits">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="m/s">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mm/s">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="other">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="RotationAngleUnit">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Degrees">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <!--PHYSICAL PROPERTIES and OTHER REFERENCES -->
+  <xs:complexType name="physical-quantity-type">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="value" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="unit" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="uncertainty" type="Uncertainty">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Range">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="min" type="xs:float" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="max" type="xs:float" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="unit" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Uncertainty">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="type">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:annotation>
+            <xs:documentation></xs:documentation>
+          </xs:annotation>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="amount">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="fraction">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="value" type="xs:double">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="ChemicalElement">
+    <xs:annotation>
+      <xs:appinfo/>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Ac">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Al">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ag">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Am">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ar">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="As">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="At">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Au">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="B">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ba">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Bh">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Bi">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Be">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Bk">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Br">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="C">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ca">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cd">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ce">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cf">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cl">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Co">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cs">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Cu">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Db">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Dy">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Er">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Es">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Eu">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="F">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Fe">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Fm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Fr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ga">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Gd">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ge">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="H">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="He">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Hf">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Hg">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ho">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Hs">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="I">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="In">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ir">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="K">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Kr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="La">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Li">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Lr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Lu">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Md">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Mg">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Mn">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Mo">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Mt">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="N">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Na">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Nb">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Nd">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ne">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ni">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="No">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Np">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="O">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Os">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="P">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pa">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pb">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pd">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Po">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pt">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Pu">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ra">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Rb">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Re">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Rf">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Rh">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Rn">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ru">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="S">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sb">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sc">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Se">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sg">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Si">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sn">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Sr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ta">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Tb">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Tc">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Te">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Th">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ti">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Tl">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Tm">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="U">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="V">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="W">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Xe">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Y">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Yb">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Zn">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Zr">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="PowderAtomizationType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Nitrogen">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Argon">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Water">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Other">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Unknown">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="AtmosphereType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="air">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="argon">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="nitrogen">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="hellium">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="vacuum">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Molten salt">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="water">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="oil">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mixture">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ReCoaterType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Blade">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Roller">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Wiper">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Other">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ReCoaterMaterialType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Tool Steel">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ceramic">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Rubber">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Other">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="OxygenContentType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="MaxO2Content" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="O2ContentUnits">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:annotation>
+            <xs:documentation></xs:documentation>
+          </xs:annotation>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ppm">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="%">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="other">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="GasFlowType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="FlowType" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:annotation>
+            <xs:documentation></xs:documentation>
+          </xs:annotation>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="Laminar">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Static">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Mixed">
+              <xs:annotation>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="FlowSpeed" type="xs:float" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="FlowSpeedUnits" type="FlowSpeedUnits" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="FlowDirection" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="PowderUsageType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Recycle">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Virgin">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="PowderSizeDistribution">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="powderSize" type="PowderSize" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PowderSize">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="diameterQuantile" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="diameter" type="physical-quantity-type" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="ScanType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Stripe">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Filled">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Checkerboard">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value=" Concentric">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Custom">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="NominalLaserSpotSize_MeasureDefinitionType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="D4sigma">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="1/e^2">
+        <xs:annotation>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+ 

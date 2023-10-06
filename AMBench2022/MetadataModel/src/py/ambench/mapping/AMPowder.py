@@ -1,6 +1,10 @@
+#=================================================
+# Mapper class for AMPowder. 
+#=================================================
 import io
 import pandas
 import string
+import numpy as np
 import openpyxl
 from openpyxl_image_loader import SheetImageLoader
 
@@ -15,11 +19,11 @@ class Mapper(AMMapper):
     
     DOC_TYPE='AMPowder'
     SHEET='Powders'
-    
+
     def __init__(self, ambench2022, CONFIG):
         super().__init__(ambench2022,Mapper.DOC_TYPE, CONFIG)
         
-    def powder_toxml(self,t,outfolder,columns):
+    def powder_toxml(self,t,outfolder,columns,composition=None,sizes=None):
         '''
         t is a tuple from DataFrame.itertuples()
         '''
@@ -36,25 +40,20 @@ class Mapper(AMMapper):
             print("Found:",t.LotNumber," ==> ",pid,"update doc from excel")
             amroot.pid=pid
 
-        # set all values based on spread sheet, i.e. do not do a comparison, 
-        # simply overwrite all in case the doc already existed. 
-        # only pid is not overwritten
         powder.lotNumber=t.LotNumber
         powder.name=t.LotNumber
         powder.supplier=maybe_string(t.Supplier)
-        powder.alloyPowderType=t.Type
+        powder.providedCharacterization = newDigitalArtifact(url=t.Provided_characterization)
+        materialInfo=amdoc.MaterialInfo()
+        materialInfo.materialClass=t.Type
+        powder.materialInfo=materialInfo
         powder.atomizationType=t.Atomization
         powder.usageType=t.Condition
 
-    #     notes=[]
-    #     notes.append(new_note(t,'Status',columns))
-    #     powder.note=notes
-
         identifier=amdoc.identifier()
         identifier.id=t.LotNumber
-        identifier.type="Internal"
+        identifier.type=AMMapper.DEFAULT_ID_TYPE
         powder.identifier=[identifier]
-
 
         xmlfile=f"{outfolder}/{t.LotNumber}.xml"
         with open(xmlfile,"w") as f:
@@ -65,8 +64,17 @@ class Mapper(AMMapper):
         ID_DOC_MAP=self.ambench2022.pids_by_name(Mapper.DOC_TYPE)
         sheets=self.read_excel(self.CONFIG.SAMPLES_EXCEL_FILE)
         sheet=sheets[Mapper.SHEET]
+        
         docs={}
-        for t in sheet.itertuples(index=False):
-            xmlfile,is_new=self.powder_toxml(t,outfolder,sheet.columns)
-            docs[xmlfile]=is_new
+        powders=sheet.groupby('LotNumber',dropna=False)
+        for doc_id,df in powders:
+            if pandas.isnull(doc_id): 
+                continue
+            try:
+                t=df.iloc[0]
+                xmlfile,is_new=self.powder_toxml(t,outfolder,columns=sheet.columns)
+                docs[xmlfile]=is_new
+            except Exception as e:
+                print("Error handling",self.DOC_TYPE,doc_id)
+                print(e)
         return docs

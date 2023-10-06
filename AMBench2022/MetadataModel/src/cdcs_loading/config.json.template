@@ -1,0 +1,13 @@
+{ 
+ "TEMPLATE": "AMDocs", 
+ "AMBENCH_URL": "https://ambench2022.nist.gov/", 
+ "LOADING": "<folder path to cdcs_loading>", 
+ "ROOT_SCHEMA": "AMDocs.xsd", 
+ "XSD": "<folder path to XSD including a trailing slash> ",     
+ "pyUTILS_path": "<folder path to py>",
+ "SAMPLES_EXCEL_FILE": "<file path to AM-Bench 2022 Samples.xlsx>",
+ "MEAS_EXCEL_FILE": "<file path to AM-Bench 2022 Measurements.xlsx>",
+ "CONTRIBUTORS_EXCEL_FILE": "<file path to Contributors.xlsx>",
+ "USER": "<username>",
+ "PASS": "<password>"   
+}
