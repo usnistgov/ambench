@@ -2,7 +2,6 @@
 # Factory method which instantiates specific Mapper class based 
 # on  DOC_TYPE.
 #=======================================================================
-import ambench.mapping.AMBenchmark
 import ambench.mapping.AMBuildPlate
 import ambench.mapping.AMBuildPart
 import ambench.mapping.AMBSpecimen
