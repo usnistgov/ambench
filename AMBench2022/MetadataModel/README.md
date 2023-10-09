@@ -94,9 +94,9 @@ The easiest way to run the code published in ```MetadataModel``` folder  is usin
 ## Local environment
 * Requirements: Linux OS, Anaconda 2020.11 for Linux OS.
 
-* Create and activate Anaconda environment with ```MetadataModel/env.yaml```. 
+* Create and activate Anaconda environment with ```MetadataModel/env.yaml``` where the name of a conda environment, <my-conda_env> is defined. 
 
-  ```conda <my-conda-env> create -f env.yaml```
+  ```conda env create -f env.yaml```
 
   ```conda activate <my-conda-env>```
 * Install and launch Jupyter Notebook in ```<my-conda-env>``` environment in a console.
