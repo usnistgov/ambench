@@ -1,0 +1,924 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+  <xs:include schemaLocation="AMReference.xsd"/>
+  <!-- ================================= -->
+  <!-- Artifact -->
+  <!-- ================================= -->
+  <xs:complexType name="PhysicalArtifact">
+    <xs:annotation>
+      <xs:documentation>A type which represents the physical objects obtained
+      as a result of the activities related with the AM Bench project. For example, 
+      build plates produced by the AM Bench project or powder acquired for the AM Bench project.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMResource">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="creationDate" type="xs:dateTime">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Creation date</label>
+              </xs:appinfo>
+              <xs:documentation>The date when a physical artifact is created or acquired</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="location" type="xs:string" maxOccurs="1" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Location</label>
+              </xs:appinfo>
+              <xs:documentation>The location of a physical artifact</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="materialInfo" type="MaterialInfo" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Material info</label>
+              </xs:appinfo>
+              <xs:documentation>The metadata which summarize the properties of a source material 
+              that a physical artifact is built from including its material class.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="processingSteps" type="ProcessingSteps" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Processing steps</label>
+              </xs:appinfo>
+              <xs:documentation>The description of the procedures taken in order 
+              to produce a specimen from build plates or build parts.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="AMBuildProduct" abstract="true">
+    <xs:annotation>
+      <xs:documentation>It represents physical objects produced in the
+      AM Bench project in order to be characterized in the project.
+      It is an abstract type which extends 'PhysicalArtifact' and 
+      serves as a base type for AMBuildPlate, AMBuildPart, and Specimen. </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="PhysicalArtifact">
+        <xs:sequence>
+          <xs:element name="benchmarkId" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Benchmark ID</label>
+              </xs:appinfo>
+              <xs:documentation>The set of benchmark measurements that the build product is part of. </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="status" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Status</label>
+              </xs:appinfo>
+              <xs:documentation>A concise description of a build status of a build product. For example,
+               'Built correctly with good in situ thermography and thermocouples -
+                Passed in situ monitoring quality check' or 'Built correctly - parts cut from build plate'
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="purpose" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Purpose</label>
+              </xs:appinfo>
+              <xs:documentation>A purpose for which a build product is created.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="designDiagram" type="AMBlobReference" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Design diagram</label>
+              </xs:appinfo>
+              <xs:documentation>A reference to an AMBlob which wraps a design document of a build product 
+              in CDCS.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- ============================================== -->
+  <!-- BUILD PLATE, result of a BUILD PROCESS -->
+  <!-- ============================================== -->
+  <xs:complexType name="AMBuildPlate">
+    <xs:annotation>
+      <xs:documentation>A type which represents build plates created for the
+      AM Bench project. </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMBuildProduct">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="partDefinition" type="PartDefinition">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Part definition</label>
+              </xs:appinfo>
+              <xs:documentation>The definition of a part which is designed to be taken from 
+              a build plate in the AM Bench project for later purposes.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="PartDefinition">
+    <xs:annotation>
+      <xs:documentation>An XML type which represents a part of a build plate 
+      in the AM Bench project which is planned to be extracted for later purposes. 
+      The part is denoted in a build plate design diagram.
+      The extracted part will result in a build part represented as a schema type 'BuildPart' 
+      for characterization measurements in the project. 
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Name</label>
+          </xs:appinfo>
+          <xs:documentation>The label of a part</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="partType" type="PartType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Part type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of a part. The allowed values are 
+          'PART', 'GUIDEWING' and 'OTHER'. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="PartType">
+    <xs:annotation>
+      <xs:documentation>The enumeration of the types of a part in a build plate.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PART">
+        <xs:annotation>
+          <xs:documentation>Part</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="GUIDEWING">
+        <xs:annotation>
+          <xs:documentation>Guide wing</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="OTHER">
+        <xs:annotation>
+          <xs:documentation>Other</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- =========================================== -->
+  <!-- Build Part -->
+  <!-- =========================================== -->
+  <xs:complexType name="BuildPart">
+    <xs:annotation>
+      <xs:documentation>A part extracted from a build plate for
+      characterization measurements in the AM Bench project.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMBuildProduct">
+        <xs:sequence>
+          <xs:element name="buildPlateId" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Build plate ID</label>
+              </xs:appinfo>
+              <xs:documentation>The PID of a build plate from which a part is extracted.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="partLabel" type="xs:string" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Part label</label>
+              </xs:appinfo>
+              <xs:documentation>The label identifying the specific part of a build plate which is
+               extracted. Its value is identical with that of an element 'name' of 'PartDefinition'.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- =========================================================================== -->
+  <!-- SPECIMEN  -->
+  <!-- =========================================================================== -->
+  <xs:complexType name="Specimen">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a specimen characterized in the 
+      AM Bench Project. It extends AMBuildProduct.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMBuildProduct">
+        <xs:sequence>
+          <xs:element name="parent" type="SpecimenParent" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Parent</label>
+              </xs:appinfo>
+              <xs:documentation>The metadata which identify a physical artifact
+              from which a specimen is extracted</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="SpecimenParent">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which identifies an AM Bench physical artifact
+      from which a specimen originated. The parent can be either a build part  
+      or source material if a specimen is extracted directly from a material.</xs:documentation>
+    </xs:annotation>
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:sequence>
+        <xs:element name="buildPlateId" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Build plate ID</label>
+            </xs:appinfo>
+            <xs:documentation>The PID of the XML document of the parent build plate of a build part from 
+            which a specimen was ultimately extracted.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="buildPartId" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Build part ID</label>
+            </xs:appinfo>
+            <xs:documentation>The PID of the XML document of a build part 
+            from which a specimen is extracted.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+      <xs:sequence>
+        <xs:element name="materialId" type="xs:anyURI" minOccurs="1" maxOccurs="1">
+          <xs:annotation>
+            <xs:appinfo>
+              <label></label>
+            </xs:appinfo>
+            <xs:documentation> The PID of the XML document of a source material from which
+            a specimen is extracted.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:sequence>
+    </xs:choice>
+  </xs:complexType>
+  <!-- ===================================================== -->
+  <!-- POWDER, and MATERIAL -->
+  <!-- ===================================================== -->
+  <xs:complexType name="Powder">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents 
+      powder used in the AM Bench Project.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="PhysicalArtifact">
+        <xs:sequence>
+          <xs:element name="supplier" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Supplier</label>
+              </xs:appinfo>
+              <xs:documentation>The source of the powder. For example, Electro Optical Systems Finland </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="lotNumber" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Lot number</label>
+              </xs:appinfo>
+              <xs:documentation>The lot number of the powder</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="usageType" type="PowderUsageType" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>The type of powder. The allowed values are 'Virgin' and 'Recycle'.</label>
+              </xs:appinfo>
+              <xs:documentation></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="atomizationType" type="PowderAtomizationType" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Atomization type</label>
+              </xs:appinfo>
+              <xs:documentation>The atomization type of powder. The allowed values are 
+              'nitrogen', 'argon', 'water', and 'other'.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="providedCharacterization" type="DigitalArtifact" maxOccurs="unbounded" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Provided characterization</label>
+              </xs:appinfo>
+              <xs:documentation>The link to a report for elemental composition measurements 
+              of powder which were not conducted by the AM Bench 2022 measurement teams. 
+              The measurement must be conducted by an accredited materials testing 
+              laboratory.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Material">
+    <xs:annotation>
+      <xs:documentation>The entity which represents a material used in the AM Bench Project. 
+      A material is a solid object of well defined shape used to produce AM Bench samples. 
+      Examples include metal sheets and blocks.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="PhysicalArtifact">
+        <xs:sequence>
+          <xs:element name="supplier" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Supplier</label>
+              </xs:appinfo>
+              <xs:documentation>The source of a material. Examples are NIST SRM, and ATI.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="specifications" type="xs:string" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Specifications</label>
+              </xs:appinfo>
+              <xs:documentation>The specifications of a material used in the AM Bench Project.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="providedCharacterization" type="DigitalArtifact" maxOccurs="unbounded" minOccurs="0">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Provided characterization</label>
+              </xs:appinfo>
+              <xs:documentation>The link to a report for a elemental composition measurement 
+              of a material which is not conducted by the AM Bench 2022 measurement teams. 
+              The measurement must be conducted by an accredited materials testing 
+              laboratory.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- ===================================================== -->
+  <!-- Processing Step -->
+  <!-- ===================================================== --> 
+  <xs:complexType name="ProcessingStep">
+    <xs:annotation>
+      <xs:documentation>The entity which represents a step in 
+       processing steps taken in order to produce a physical artifact in the AM Bench Project.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>ID</label>
+          </xs:appinfo>
+          <xs:documentation>The order of a step in the processing steps.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>The description of a step</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="processingIllustration" type="AMBlobReference" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Processing illustration</label>
+          </xs:appinfo>
+          <xs:documentation>A reference to an AMBlob which wraps an image illustrating
+          a processing step in CDCS.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="completeDate" type="xs:dateTime" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Complete date</label>
+          </xs:appinfo>
+          <xs:documentation>The completion date of a step</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="primaryContact" type="Person" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Primary contact</label>
+          </xs:appinfo>
+          <xs:documentation>The primary contact for a step.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="resultingCondition" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Resulting condition</label>
+          </xs:appinfo>
+          <xs:documentation>The outcome of a processing step.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ProcessingSteps">
+    <xs:annotation>
+      <xs:documentation>The list of the main steps taken in order to produce a physical artifact in the AM Bench Project.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="ProcessingStep" type="ProcessingStep" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Processing step</label>
+          </xs:appinfo>
+          <xs:documentation>Processing step.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- ===================================================== -->
+  <!-- BUILD PROCESS -->
+  <!-- ===================================================== -->
+  <xs:complexType name="AM-Process">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="LaserPowderBedFusion">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:annotation>
+            <xs:documentation></xs:documentation>
+          </xs:annotation>
+          <xs:sequence>
+            <xs:element name="PowderBedFusion-instrument" type="Instrument" minOccurs="0">
+              <xs:annotation>
+                <xs:appinfo>
+                  <label></label>
+                </xs:appinfo>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="BuildEnviroment" type="BuildEnvironmentType">
+              <xs:annotation>
+                <xs:appinfo>
+                  <label></label>
+                </xs:appinfo>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="BuildParameters" type="BuildParametersType" minOccurs="0">
+              <xs:annotation>
+                <xs:appinfo>
+                  <label></label>
+                </xs:appinfo>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="OtherProcessingFiles" type="DigitalArtifact" minOccurs="0">
+              <xs:annotation>
+                <xs:appinfo>
+                  <label></label>
+                </xs:appinfo>
+                <xs:documentation></xs:documentation>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="BuildEnvironmentType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="BuildAtmosphere" type="AtmosphereType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="OxygenContent" type="OxygenContentType" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="GasFlow" type="GasFlowType" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ReCoating" type="ReCoatingType" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="BuildEnvironmentNotes" type="Note" maxOccurs="unbounded" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ReCoatingType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="ReCoaterType" type="ReCoaterType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ReCoaterMaterial" type="ReCoaterMaterialType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BuildParametersType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Laser" type="LaserType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SolidLayers" type="SolidLayerType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ScanGeometry" type="ScanGeometryType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="DigitalScanCommandFileID" type="DigitalArtifact">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="note" type="Note" maxOccurs="unbounded" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="LaserType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="LaserType" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NominalLaserPower" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="LaserPowerValueUnit" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NominalScanningSpeedValue" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ScanningSpeedUnit" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NominalLaserSpotSize" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="NominalLaserSpotSize_MeasureDefinition" type="NominalLaserSpotSize_MeasureDefinitionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SpotSizeUnit" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SolidLayerType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="LayerThickness" type="xs:float" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ThicknessUnits" type="LengthUnit" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="TotalNumberLayers" type="xs:integer">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ScanGeometryType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="ScanType" type="ScanType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="StripeWidth" type="StripeWidthType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="HatchingSpacing" type="HatchSpacingType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="RotationBetweenLayers" type="RotationLayersType">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ScanGeometryNotes" type="Note">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="StripeWidthType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="StripeWidthValue" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="StripeWidthUnits" type="LengthUnit">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="HatchSpacingType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="HatchSpacingValue" type="xs:float">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="HatchSpacingUnit" type="LengthUnit">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RotationLayersType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="RotationAngleBetweenLayers" type="xs:string"><xs:annotation><xs:appinfo><label></label></xs:appinfo><xs:documentation></xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="RotationAngleUnit" type="RotationAngleUnit">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- ============================================== -->
+  <!-- BUILD Process -->
+  <!-- ============================================== -->
+  <xs:complexType name="AMBuildProcess">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMActivity">
+        <xs:sequence>
+          <xs:element name="AMBuildProcessType" type="AM-Process">
+            <xs:annotation>
+              <xs:appinfo>
+                <label></label>
+              </xs:appinfo>
+              <xs:documentation></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="powder" type="xs:anyURI">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>PID of the AMPowder document with metadata about the powder used in this build process.</label>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="buildPlateID" type="xs:string" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>PID of the AMBuildPlate document with metadata about the result of this build process.</label>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="BuildPlateImage" type="DigitalArtifact">
+            <xs:annotation>
+              <xs:appinfo>
+                <label></label>
+              </xs:appinfo>
+              <xs:documentation></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="buildNote" type="BuildNote">
+            <xs:annotation>
+              <xs:appinfo>
+                <label></label>
+              </xs:appinfo>
+              <xs:documentation></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="PrintingNotes" type="Note">
+            <xs:annotation>
+              <xs:appinfo>
+                <label></label>
+              </xs:appinfo>
+              <xs:documentation></xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="BuildNote">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Note" type="Note">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Downloadfiles" type="DigitalArtifact">
+        <xs:annotation>
+          <xs:appinfo>
+            <label></label>
+          </xs:appinfo>
+          <xs:documentation></xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,715 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+  <xs:include schemaLocation="AMReference.xsd"/>
+  <xs:annotation>
+    <xs:documentation>
+        The schema for the metadata describing characterization measurements conducted in the AMBench 2022 project.  
+      </xs:documentation>
+  </xs:annotation>
+  <!-- The XML schema definition for the characterization measurements conducted in  -->
+  <!-- AMBench 2022 project.  -->
+  <!-- ================================= -->
+  <!-- Measurement base types -->
+  <!-- ================================= -->
+  <xs:complexType name="Measurement">
+    <xs:annotation>
+      <xs:documentation>The base XML schema type for all measurement types. It encapsulates 
+       the overall information about measurements that are applicable  
+       regardless of their types. 
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="AMActivity">
+        <xs:sequence>
+          <xs:element name="benchmarkId" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+            
+              <xs:appinfo>
+                <label>Benchmark ID</label>
+              </xs:appinfo>
+              <xs:documentation>The AM Benchmark name that a measurement is part of.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="challengeId" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Challenge ID</label>
+              </xs:appinfo>
+              <xs:documentation>The name of an AM Bench challenge problem that 
+              a measurement is associated with.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="facility" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Facility</label>
+              </xs:appinfo>
+              <xs:documentation>The name of the facility where a measurement is conducted.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="relatedMeasurement" type="RelatedMeasurement" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Related measurement</label>
+              </xs:appinfo>
+              <xs:documentation>The list of AM Bench measurements which 
+              are related to this measurement.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="isCalibrationMeasurement" type="xs:string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Is calibration measurement?</label>
+              </xs:appinfo>
+              <xs:documentation>Is a measurement conducted for instrument calibration or not? 
+              The allowed values are Y or N.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="measurementInfo" type="MeasurementInfo" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Measurement info</label>
+              </xs:appinfo>
+              <xs:documentation>The general description of the type of a measurement .</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MeasurementInfo">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which encapsulates 
+      the general description of the type of a measurement.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="measurementType" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement type</label>
+          </xs:appinfo>
+          <xs:documentation>The name of the the measurement type. 
+          Examples are composition, radiography, etc.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="typeDescription" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type description</label>
+          </xs:appinfo>
+          <xs:documentation>The explanation of what a measurement type is.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="measuredQuantity" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measured quantity</label>
+          </xs:appinfo>
+          <xs:documentation>The list of physical properties that
+           are measured by a measurement type. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="modelingApproach" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Modeling approach</label>
+          </xs:appinfo>
+          <xs:documentation>The list of the models and the simulations 
+          that the measurements of this type can be used to guide and to test.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="keyword" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>keyword</label>
+          </xs:appinfo>
+          <xs:documentation>The list of keywords associated with 
+          a measurement type.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="buildProcessInSitu" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Build process in situ</label>
+          </xs:appinfo>
+          <xs:documentation>Are measurements of a type 
+           in-situ build process or not? The allowed values are Y or N.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="postBuildProcessInSitu" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Post-build process in situ</label>
+          </xs:appinfo>
+          <xs:documentation>Are measurements of a type  
+          in-situ post-build process or not? The allowed values are Y or N.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RelatedMeasurement">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which describes 
+      an AM Bench measurement related to another measurement.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of a related measurement.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="measurementIdentifier" type="identifier" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement Identifier</label>
+          </xs:appinfo>
+          <xs:documentation>The identifier of a related measurement assigned by the AM Bench project.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="measurementPID" type="xs:anyURI" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement PID</label>
+          </xs:appinfo>
+          <xs:documentation>The persistent identifier(PID) of an XML document of a related measurement.
+           It is a URI of the document in NIST Materials Data Creation System (CDCS). </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="data" type="DigitalArtifact" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Data</label>
+          </xs:appinfo>
+          <xs:documentation>The access URL where the results of a related measurement 
+           in digital format can be access.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Description</label>
+          </xs:appinfo>
+          <xs:documentation>The description of a related measurement.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="MeasurementInput">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which describes a sample used for a measurement. 
+      A sample is a kind of a physical artifact which includes build plates, build parts, specimen, powder, and material.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="specimenID" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Specimen ID</label>
+          </xs:appinfo>
+          <xs:documentation>The name of the physical artifact used in a measurement.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="specimenPID" type="xs:anyURI" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Specimen PID</label>
+          </xs:appinfo>
+          <xs:documentation>
+            The persistent identifier (PID) of an XML document of 
+            an input physical artifact in CDCS.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="type" type="ArtifactType" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of an input physical artifact. 
+          Example values are Powder, Material, AMPowder, AMBuildPlate, AMBuildPart, and AMBSpecimen</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="condition" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Condition</label>
+          </xs:appinfo>
+          <xs:documentation>The condition of a physical artifact used in a measurement. 
+          The allowed values are 'starting material', 'build process', 'as built', 
+          'homogenized', 'fully heat treated', 'from as built to homogenized', and
+          'from homogenized to fully heat treated'.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="materialInfo" type="MaterialInfo" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Material info</label>
+          </xs:appinfo>
+          <xs:documentation>The list of the metadata of the source material that a sample is built from 
+          including its properties.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="geometry" type="SpecimenMeasurementGeometry" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Geometry</label>
+          </xs:appinfo>
+          <xs:documentation>The list of the metadata which describe 
+          the measurement geometry including the measurement direction with an illustration if available.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="specimenMetadata" type="ObjectType" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Specimen metadata</label>
+          </xs:appinfo>
+          <xs:documentation>The list of the metadata specific to 
+          the physical artifact used in the measurement.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="SpecimenMeasurementGeometry">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which summarizes 
+      the metadata for a specimen measurement geometry.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <!-- X, Y, Z, XY, XZ, YZ, XYZ, Z +angle in degree -->
+      <xs:element name="measurementDirection" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement direction</label>
+          </xs:appinfo>
+          <xs:documentation>The direction where a measurement is taken. 
+          The allowed values are X, Y, Z, XY, XZ, YZ, XYZ, Z + angle in degree.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="measurementZRange" type="Range" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Measurement Z range</label>
+          </xs:appinfo>
+          <xs:documentation>The comma separated range in distance units along Z axis 
+          where a measurement is taken</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="document" type="DigitalArtifact" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Document</label>
+            </xs:appinfo>
+            <xs:documentation>The access URL to a document which describes in detail
+             a specimen of a measurement and
+             its measurement geometry.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="imageRef" type="AMBlobReference" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Image reference</label>
+            </xs:appinfo>
+            <xs:documentation>The diagrams or pictures of the true sample shape, 
+            mounting configuration, and measurement positions including its description 
+            or its caption.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="MeasurementMethod">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which describes the instruments and 
+      their configurations as well as the experiment configurations 
+      of measurements. Instead of defining an individual schema type for 
+      each measurement type, the schema types ‘InstrumentConfiguration’ and 
+      ‘ExperimentConfigurations’ are used for describing the measurement configurations
+      for all measurement types defined in 
+      the AM bench project.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="instrumentConfiguration" type="InstrumentConfiguration" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Instrument configuration</label>
+          </xs:appinfo>
+          <xs:documentation>The metadata which describes the instruments 
+          including sensors or detectors and 
+          their configurations for a measurement</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="experimentConfiguration" type="ExperimentConfiguration" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Experiment configuration</label>
+          </xs:appinfo>
+          <xs:documentation>The metadata which describes the experiment configuration of a measurement</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="InstrumentConfiguration">
+    <xs:annotation>
+      <xs:documentation>The XML schema type type which encapsulates the metadata for instruments 
+       and their configurations used in a measurement.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="mainInstrument" type="Instrument" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Main instrument</label>
+          </xs:appinfo>
+          <xs:documentation>The metadata which describe the main instruments 
+          and their configurations for a measurement</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ancillaryInstrument" type="Instrument" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Ancillary instrument</label>
+          </xs:appinfo>
+          <xs:documentation>The description of ancillary instruments 
+          and their configurations as used in a measurement</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ExperimentConfiguration">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which encapsulates the metadata 
+      describing the experiment configuration of a measurement. Each component of the 
+      configuration is mapped to an element of type 'ConfigurationObject'. </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="component" type="ConfigurationObject" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Component</label>
+          </xs:appinfo>
+          <xs:documentation>A component of an experiment configuration. 
+           For example, in laser absorptivity measurements one component of its experiment configuration 
+           is 'AM Simulator parameters' and the other is Time_resolution of instrument 'Integrating sphere'. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ConfigurationObject">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a component of 
+      an experiment configuration. If applicable each component of a configuration is grouped by an 
+      associated instrument. A component can consist of multiple fields of type Field defined in 
+      AMResource.xsd</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="ObjectType">
+        <xs:sequence>
+          <xs:element name="associatedInstrument" type="InstrumentRef" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Associated instrument</label>
+              </xs:appinfo>
+              <xs:documentation>The name of an instrument with which a configuration is 
+              associated. If applicable, the name of a detector or a sensor is also given.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="MeasurementOutput">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which encapsulates published results of 
+      a measurement defined in the AM Bench project. A result can be a file location 
+      of various types of published measurement data and their analysis codes, 
+      derived properties from a measurement, etc.  
+      The results are usually grouped by raw and processed data sets, but not limited to them.
+      This type is used for describing the outcome of most of the 
+      measurement types defined in the AM Bench project. 
+      An exception is describing outputs from composition since the metadata structure
+      for composition output is quite different from that of other measurement types.
+      The metadata for a journal publication 
+      resulting from a measurement is stored as an XML element 'journalPublication' of
+      AMResource as defined in AMReference.xsd.      
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dataSet" type="DataSet" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Data set</label>
+          </xs:appinfo>
+          <xs:documentation>A set of data from a measurement.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DataSet">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a group of the 
+      measurement outputs. It provides the description of a set and the 
+      data objects which belong to a set.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Type</label>
+          </xs:appinfo>
+          <xs:documentation>The type of a data set. Examples are raw, and processed data sets.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataObject" type="DataObject" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Data object</label>
+          </xs:appinfo>
+          <xs:documentation>A data object which belongs to a given data set.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DataObject">
+    <xs:annotation>
+      <xs:documentation>An XML schema type which represents a structured data type 
+      including the instrument that the data type is measured by 
+      It extends the schema type 'ObjectType' defined in AMResource.xsd.  
+    </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="ObjectType">
+        <xs:sequence>
+          <xs:element name="measuredBy" type="InstrumentRef" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Measured by</label>
+              </xs:appinfo>
+              <xs:documentation>The name of an instrument including sensor or detector, 
+              if relevant, which a data object is measured by.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InstrumentRef">
+    <xs:annotation>
+      <xs:documentation>Reference to an instrument. It is used to identify the name of 
+      an instrument and the name of a sensor or a detector if relevant.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="instrumentName" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Instrument name</label>
+          </xs:appinfo>
+          <xs:documentation>The name of an instrument</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:choice minOccurs="0" maxOccurs="1">
+        <xs:element name="detector" type="xs:string">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Detector</label>
+            </xs:appinfo>
+            <xs:documentation>The name of a detector.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="sensor" type="xs:string">
+          <xs:annotation>
+            <xs:appinfo>
+              <label>Sensor</label>
+            </xs:appinfo>
+            <xs:documentation>The name of a sensor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- =============== Laser Absorptivity =============== -->
+  <xs:complexType name="LaserAbsorptivityMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Laser absorptivity measurement</label>
+      </xs:appinfo>
+      <xs:documentation>The XML schema type which describes in situ measurements
+      of laser absorptivity in the AM Bench project</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Measurement Method</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement method</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Specimen</label>
+              </xs:appinfo>
+              <xs:documentation>The sample on which the measurement is conducted</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Results</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement output</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- =============== Mechanical Testing =============== -->
+  <xs:complexType name="MechanicalTestingMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Mechanical testing measurement</label>
+      </xs:appinfo>
+      <xs:documentation>The XML schema type which describes measurements 
+      of mechanical testing of material behavior in the AM Bench project</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Measurement Method</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement method</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Specimen</label>
+              </xs:appinfo>
+              <xs:documentation>The sample on which a measurement is conducted</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Results</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement output</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- =============== Radiography =============== -->
+  <xs:complexType name="RadiographyMeasurement">
+    <xs:annotation>
+      <xs:appinfo>
+        <label>Radiography measurement</label>
+      </xs:appinfo>
+      <xs:documentation>The XML schema type which describes X-ray imaging, typically at a  
+      high speed</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Measurement Method</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement method</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Specimen</label>
+              </xs:appinfo>
+              <xs:documentation>The sample on which a measurement is conducted</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="results" type="MeasurementOutput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Results</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement output</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <!-- =============== Composition =============== -->
+  <xs:complexType name="CompositionMeasurement">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which describes 
+      measurements of elemental composition in a sample with their quantities</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Measurement">
+        <xs:sequence>
+          <xs:element name="measurementMethod" type="MeasurementMethod" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Measurement method</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement method</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="specimen" type="MeasurementInput" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Specimen</label>
+              </xs:appinfo>
+              <xs:documentation>The sample on which a measurement is conducted.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="results" type="CompositionResult" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:appinfo>
+                <label>Results</label>
+              </xs:appinfo>
+              <xs:documentation>The measurement output</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="CompositionResult">
+    <xs:annotation>
+      <xs:documentation>The XML schema type which describes the outcome of composition 
+      measurements.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="testReport" type="DigitalArtifact" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Test report</label>
+          </xs:appinfo>
+          <xs:documentation>The URL of a report which contains 
+          measurement methods, and results of a composition measurement. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="composition" type="Composition" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:appinfo>
+            <label>Composition</label>
+          </xs:appinfo>
+          <xs:documentation>The metadata which describe the chemical 
+          composition of a sample</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
