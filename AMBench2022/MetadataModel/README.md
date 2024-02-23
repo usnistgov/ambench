@@ -16,7 +16,10 @@ as analysis descriptions of these datasets.
 This data model is an abstraction of these metadata, designed using the concepts
 of inheritance, normalization, and reusability of an object oriented language for
 ease of extensibility and maintenance. It is simple to incorporate new metadata
-as needed.
+as needed. 
+
+The schema is published in 
+[Additive Manufacturing Benchmark 2022 Schema](https://data.nist.gov/od/id/mds2-2933).
 
 [AM Bench CDCS database](https://ambench2022.nist.gov/) at NIST was filled with 
 metadata provided by the contributors to the AM Bench project. They entered 
