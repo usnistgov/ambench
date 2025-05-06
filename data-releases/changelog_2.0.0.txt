@@ -1,0 +1,30 @@
+List of changes from original release to version 2.0.0
+
+1. The changes in the XML schema: 
+  a. Changed the schema element for specifying the quantity of a constituent 
+     element obtained from a composition measurement. The amount of each 
+     constituent material is given by the element 'quantity' whose element type 
+     is 'physical-quantity-type' which includes quantity, unit, and uncertainty. 
+     This update resulted in changes in the XML documents for all the 
+     AM Bench 2022 composition measurements.
+  b. Added element 'supplier' to 'Material' complex type which corresponds to the 
+     name of the organization supplying the material. This update is reflected 
+     in the following XML documents: 718-SH1.xml, AA5182-D1.xml, and TI64-D1.xml.
+  c. Added the schema components 'AMScanningElectronMicroscopy', and 
+     'AMOpticalMicroscopy' which encapsulate the metadata describing 
+     Scanning Electron Microscopy (SEM) and Optical Microscopy (OM) AM Bench 
+     measurements. 
+
+2. Changed the measurement identifiers for all Composition measurements. 
+   Replaced the prefixes 'AMB2022-Composition-' and 'Composition-' by 
+   'AMB2022_Composition_' and 'Composition_', respectively. This update 
+   results in changes to the title of each XML document, and the values 
+   of the name, and identifier elements for the composition measurements.
+   For example, AMB2022-Composition-718-AMMT-B8-G1.xml in the previous 
+   release is AMB2022_Composition_718-AMMT-B8-G1.xml in this release.
+3. Relaced all the blobs in the previous release in order to fix errors in 
+   some of the blobs 
+4. Corrected typos in the values of the name, identifier, and material 
+   class elements in the following XML documents: 
+   AMB2022-718-AMMT-B6-P2-L10-W2.xml, AMB2022-718-AMMT-B6-P2-L10-W4.xml, 
+   AMB2022-718-AMMT-B6-P2-L6.xml. 
