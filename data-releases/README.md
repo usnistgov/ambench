@@ -1,5 +1,9 @@
 # Additive Manufacturing Benchmark Data Release Repository
 
+## Current Release
+* **Current Release Version: 2.1.0**
+* **Current release Date: 2025-05-05**
+  
 ## About
 * This repository is setup for sharing data releases in support of the [NIST AMBench 2022 project](https://www.nist.gov/ambench).  
 * Data releases are provided as downloadable ZIP files.
