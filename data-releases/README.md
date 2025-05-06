@@ -16,10 +16,10 @@ Material Measurement Laboratory/Materials Science and Engineering Division
 lyle.levine@nist.gov
 (301) 975-6032
 
-* Brandon Lane
-brandon.lane@nist.gov
+* Jordan Weaver
+jordan.weaver@nist.gov
 Engineering Laboratory
-(301) 975-5471
+(301) 975-2265
 
 * For the AM Bench project organization details please see [here](https://www.nist.gov/ambench/organization).
 <!--
@@ -28,14 +28,6 @@ Engineering Laboratory
    - Details of mailing lists, chatrooms, and discussion forums,
      where applicable
 -->
-### Related Material
-   - URL for associated project on <nist.gov> or other Department of
-     Commerce site, if available
-   - References to user guides if stored outside of GitHub
-### Citation
-Directions on appropriate citation with example text
-### References
-References to any included non-public domain software modules
 
 ### Terms of Use
 
